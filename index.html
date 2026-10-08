@@ -2,21 +2,22 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="theme-color" content="#06060c" />
 <title>NEBULA · live wall</title>
 <style>
-  *{box-sizing:border-box}
-  html,body{height:100%}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overscroll-behavior:none}
   body{
     margin:0; overflow:hidden; color:#ececf5;
     font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Inter,Roboto,sans-serif;
     background:#06060c; -webkit-font-smoothing:antialiased;
-    user-select:none;
+    user-select:none; -webkit-user-select:none;
   }
-  button{font-family:inherit}
+  button{font-family:inherit;touch-action:manipulation}
   input{font-family:inherit}
 
-  /* ───────── canvas ───────── */
+  /* ───── canvas ───── */
   #canvas{
     position:fixed; inset:0; overflow:hidden;
     background:
@@ -34,7 +35,6 @@
     -webkit-mask-image:radial-gradient(circle at 50% 42%, #000 35%, transparent 88%);
     mask-image:radial-gradient(circle at 50% 42%, #000 35%, transparent 88%);
   }
-  /* aurora */
   #aurora{
     position:fixed; inset:-20%; pointer-events:none; z-index:0; opacity:.5;
     background:
@@ -49,16 +49,21 @@
     100%{transform:translate3d( 2%,  3%,0) rotate(6deg)}
   }
 
-  /* ───────── top bar ───────── */
+  /* ───── top bar ───── */
   #bar{
-    position:fixed; top:0; left:0; right:0; height:64px; z-index:9000;
-    display:flex; align-items:center; gap:14px;
-    padding:0 16px; pointer-events:none;
+    position:fixed; top:0; left:0; right:0;
+    height:60px; padding:0 14px;
+    z-index:9000; display:flex; align-items:center; gap:12px;
+    pointer-events:none;
     background:linear-gradient(180deg, rgba(6,6,12,.94), rgba(6,6,12,.35) 70%, transparent);
     -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+    padding-top:env(safe-area-inset-top);
   }
   #bar > *{pointer-events:auto}
-  .brand{display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.24em; font-size:13px; flex-shrink:0}
+  .brand{
+    display:flex; align-items:center; gap:9px;
+    font-weight:800; letter-spacing:.24em; font-size:13px; flex-shrink:0;
+  }
   .orb{
     width:13px; height:13px; border-radius:50%;
     background:radial-gradient(circle at 32% 30%, #fff, #8b5cff 45%, #4dd4ff);
@@ -68,17 +73,22 @@
   @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.24);opacity:.72}}
 
   #ticker{
-    flex:1; min-width:0; text-align:center;
-    font-size:12.5px; font-weight:600; color:#a9a9c6;
-    letter-spacing:.02em; opacity:0; transform:translateY(-4px);
-    transition:opacity .3s, transform .3s; pointer-events:none;
-    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    flex:1; min-width:0;
     display:flex; align-items:center; justify-content:center; gap:6px;
+    font-size:12.5px; font-weight:600; color:#a9a9c6;
+    letter-spacing:.02em; white-space:nowrap; overflow:hidden;
+    text-overflow:ellipsis; opacity:0; transform:translateY(-4px);
+    transition:opacity .3s, transform .3s;
+    pointer-events:none;
   }
   #ticker.show{opacity:1; transform:translateY(0)}
-  #ticker .dot{width:5px; height:5px; border-radius:50%; background:#8b5cff; box-shadow:0 0 8px #8b5cff}
+  #ticker .dot{
+    width:5px; height:5px; border-radius:50%;
+    background:#8b5cff; box-shadow:0 0 8px #8b5cff; flex-shrink:0;
+  }
+  #ticker .dot.pulse{animation:pulse 1s ease-in-out infinite}
 
-  .right{display:flex; align-items:center; gap:10px; flex-shrink:0}
+  .right{display:flex; align-items:center; gap:8px; flex-shrink:0}
   .people{display:flex; align-items:center}
   .avatar{
     width:28px; height:28px; border-radius:50%; margin-left:-9px;
@@ -86,18 +96,18 @@
     border:2px solid #0b0b14; color:#07070d;
     box-shadow:0 0 12px -2px currentColor;
     animation:pop .3s cubic-bezier(.2,1.5,.4,1);
-    transition:transform .18s;
   }
-  .avatar:hover{transform:translateY(-2px) scale(1.08); z-index:2}
   .avatar:first-child{margin-left:0}
   .avatar.more{background:#23233a !important; color:#c9c9e0 !important}
   @keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
 
   .status{
-    display:flex; align-items:center; gap:7px; font-size:11px; font-weight:700;
-    color:#8b8ba7; letter-spacing:.08em; text-transform:uppercase;
+    display:flex; align-items:center; gap:7px;
+    font-size:11px; font-weight:700; color:#8b8ba7;
+    letter-spacing:.08em; text-transform:uppercase;
     padding:6px 11px; border-radius:99px;
-    background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.045);
+    border:1px solid rgba(255,255,255,.08);
   }
   .status i{width:7px; height:7px; border-radius:50%; background:#666; transition:.3s}
   .status.live i{background:#3ce88a; box-shadow:0 0 10px #3ce88a}
@@ -107,33 +117,33 @@
     all:unset; cursor:pointer; font-size:13px; font-weight:700; color:#ececf5;
     padding:9px 14px; border-radius:11px; text-align:center;
     background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1);
-    transition:.16s; white-space:nowrap;
+    transition:.16s; white-space:nowrap; touch-action:manipulation;
   }
   .btn:hover{background:rgba(255,255,255,.12); transform:translateY(-1px)}
   .btn:active{transform:translateY(0) scale(.97)}
   .btn.primary{
-    background:linear-gradient(140deg,#8b5cff,#4dd4ff); color:#07070d; border-color:transparent;
+    background:linear-gradient(140deg,#8b5cff,#4dd4ff);
+    color:#07070d; border-color:transparent;
     box-shadow:0 8px 26px -10px #8b5cff;
   }
-  .btn.primary:hover{box-shadow:0 12px 34px -8px #8b5cff}
   .btn.icon{padding:9px 11px; font-size:14px; line-height:1}
 
-  /* ───────── notes ───────── */
+  /* ───── notes ───── */
   .note{
     position:absolute; top:0; left:0;
-    width:200px; /* JS overrides */
+    width:200px; /* overridden by JS */
     padding:10px 12px 11px;
-    border-radius:16px; cursor:default; touch-action:none;
+    border-radius:16px; touch-action:none;
     background:linear-gradient(158deg, var(--c-soft), rgba(9,9,17,.9));
     border:1px solid var(--c-line);
     box-shadow:
       0 14px 36px -18px rgba(0,0,0,.95),
       0 0 30px -14px var(--c),
       inset 0 1px 0 rgba(255,255,255,.06);
-    transition:box-shadow .2s, border-color .2s, width .18s cubic-bezier(.3,1.4,.4,1);
+    transition:box-shadow .2s, border-color .2s;
     will-change:transform;
     animation:dropIn .42s cubic-bezier(.2,1.4,.35,1) both;
-    user-select:none;
+    user-select:none; -webkit-user-select:none;
   }
   @keyframes dropIn{
     0%  {opacity:0; transform:translate3d(var(--tx),calc(var(--ty) - 24px),0) scale(.85); filter:blur(8px)}
@@ -147,8 +157,6 @@
       inset 0 1px 0 rgba(255,255,255,.08);
     border-color:var(--c);
   }
-  .note.gone{animation:vanish .26s ease forwards}
-  @keyframes vanish{to{opacity:0; filter:blur(10px); transform:scale(.9) translate(var(--tx),var(--ty))}}
   .note.dragging{
     box-shadow:
       0 40px 80px -24px rgba(0,0,0,1),
@@ -157,28 +165,45 @@
     border-color:var(--c);
     transition:none;
   }
+  .note.gone{animation:vanish .26s ease forwards}
+  @keyframes vanish{to{opacity:0; filter:blur(10px); transform:translate3d(var(--tx),var(--ty),0) scale(.9)}}
 
   .note-head{
-    display:flex; align-items:center; gap:8px; height:22px;
+    display:flex; align-items:center; gap:8px; height:24px;
     cursor:grab; touch-action:none;
   }
   .note.dragging .note-head{cursor:grabbing}
 
   .author{display:flex; align-items:center; gap:6px; flex:1; min-width:0}
   .author .dot{
-    width:8px; height:8px; border-radius:50%; background:var(--c);
-    box-shadow:0 0 10px var(--c); flex-shrink:0;
+    width:8px; height:8px; border-radius:50%;
+    background:var(--c); box-shadow:0 0 10px var(--c); flex-shrink:0;
   }
   .author .who{
     font-size:10px; font-weight:800; letter-spacing:.14em; text-transform:uppercase;
     color:var(--c); opacity:.95;
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
+  .typing-dots{
+    display:inline-flex; gap:3px; align-items:center; flex-shrink:0;
+  }
+  .typing-dots i{
+    width:5px; height:5px; border-radius:50%;
+    animation:typebob 1s ease-in-out infinite;
+  }
+  .typing-dots i:nth-child(2){animation-delay:.14s}
+  .typing-dots i:nth-child(3){animation-delay:.28s}
+  @keyframes typebob{
+    0%,60%,100%{transform:translateY(0); opacity:.55}
+    30%        {transform:translateY(-4px); opacity:1}
+  }
+
   .acts{display:flex; gap:1px; opacity:0; transition:opacity .16s; flex-shrink:0}
   .note:hover .acts, .note.dragging .acts{opacity:1}
   .acts button{
-    all:unset; width:20px; height:20px; display:grid; place-items:center; cursor:pointer;
-    border-radius:6px; font-size:10px; color:#d3d3e6; transition:.14s;
+    all:unset; width:22px; height:22px; display:grid; place-items:center;
+    cursor:pointer; border-radius:6px; font-size:11px;
+    color:#d3d3e6; transition:.14s; touch-action:manipulation;
   }
   .acts button:hover{background:rgba(255,255,255,.16); color:#fff}
   .acts .a-del:hover{background:rgba(255,80,110,.3); color:#ff8098}
@@ -188,65 +213,78 @@
     font-size:14px; line-height:1.5; color:#f5f5fd;
     white-space:pre-wrap; word-break:break-word;
     outline:none; cursor:text;
-    max-height:360px; overflow:auto;
-    user-select:text;
+    max-height:340px; overflow:auto;
+    user-select:text; -webkit-user-select:text;
     scrollbar-width:thin; scrollbar-color:rgba(255,255,255,.18) transparent;
-    transition:min-height .15s;
   }
   .body::-webkit-scrollbar{width:5px}
   .body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18); border-radius:9px}
-  .body:empty::before{
-    content:"type…"; color:rgba(255,255,255,.22); pointer-events:none;
-  }
+  .body:empty::before{content:"type…"; color:rgba(255,255,255,.22); pointer-events:none}
 
-  /* ───────── reactions ───────── */
+  /* ───── reactions ───── */
   .react-bar{
-    display:flex; flex-wrap:wrap; gap:5px; margin-top:9px;
-    min-height:22px; align-items:center;
+    display:flex; flex-wrap:wrap; gap:5px; margin-top:10px;
+    min-height:24px; align-items:center;
   }
   .react-chip{
     all:unset; cursor:pointer;
-    display:inline-flex; align-items:center; gap:4px;
-    padding:2px 8px 3px; border-radius:99px; font-size:12px;
-    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.09);
-    transition:.15s; line-height:1.2;
+    display:inline-flex; align-items:center; gap:5px;
+    padding:3px 9px 4px; border-radius:99px;
+    background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.1);
+    transition:.15s; line-height:1.1; font-size:13px;
     animation:chipIn .3s cubic-bezier(.2,1.5,.4,1);
+    touch-action:manipulation;
   }
   @keyframes chipIn{from{transform:scale(0); opacity:0}to{transform:scale(1); opacity:1}}
-  .react-chip:hover{background:rgba(255,255,255,.13); transform:translateY(-1px)}
+  .react-chip:hover{background:rgba(255,255,255,.14); transform:translateY(-1px)}
   .react-chip b{font-size:11px; font-weight:800; color:#cfcfe6}
   .react-chip.mine{
-    background:color-mix(in srgb, var(--c) 22%, transparent);
-    border-color:color-mix(in srgb, var(--c) 55%, transparent);
+    background:color-mix(in srgb, var(--c) 26%, transparent);
+    border-color:color-mix(in srgb, var(--c) 60%, transparent);
   }
   .react-chip.mine b{color:#fff}
   .react-add{
     all:unset; cursor:pointer;
     display:inline-flex; align-items:center; justify-content:center;
-    width:22px; height:22px; border-radius:99px; font-size:13px; font-weight:700;
-    color:#8b8ba7; background:rgba(255,255,255,.05); border:1px dashed rgba(255,255,255,.14);
-    transition:.15s;
+    width:26px; height:26px; border-radius:99px;
+    font-size:15px; font-weight:600; line-height:1;
+    color:#8b8ba7;
+    background:rgba(255,255,255,.05);
+    border:1px dashed rgba(255,255,255,.18);
+    transition:.15s; touch-action:manipulation;
   }
-  .react-add:hover{color:#fff; background:rgba(255,255,255,.12); border-color:var(--c); border-style:solid}
+  .react-add:hover{
+    color:#fff; background:rgba(255,255,255,.13);
+    border-color:var(--c); border-style:solid;
+  }
 
-  /* ───────── emoji picker popover ───────── */
+  /* ───── emoji picker ───── */
   .emoji-picker{
     position:fixed; z-index:9700;
-    display:flex; gap:2px; padding:6px; border-radius:14px;
-    background:rgba(20,20,32,.96); border:1px solid rgba(255,255,255,.1);
-    box-shadow:0 20px 50px -12px #000;
-    -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+    display:flex; flex-wrap:wrap; gap:2px; padding:7px;
+    border-radius:16px; max-width:min(320px, 92vw);
+    background:rgba(20,20,32,.97);
+    border:1px solid rgba(255,255,255,.12);
+    box-shadow:0 24px 60px -14px #000;
+    -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
     animation:popIn .18s cubic-bezier(.2,1.5,.4,1);
+    touch-action:manipulation;
   }
-  @keyframes popIn{from{transform:translateY(6px) scale(.94); opacity:0}to{transform:translateY(0) scale(1); opacity:1}}
+  @keyframes popIn{
+    from{transform:translateY(6px) scale(.94); opacity:0}
+    to  {transform:translateY(0) scale(1); opacity:1}
+  }
   .emoji-picker button{
     all:unset; cursor:pointer;
-    width:34px; height:34px; display:grid; place-items:center; border-radius:9px;
-    font-size:19px; transition:.12s;
+    width:38px; height:38px; display:grid; place-items:center;
+    border-radius:10px; font-size:21px; transition:.12s;
+    touch-action:manipulation;
   }
-  .emoji-picker button:hover{background:rgba(255,255,255,.12); transform:scale(1.14)}
+  .emoji-picker button:hover{background:rgba(255,255,255,.14); transform:scale(1.14)}
+  .emoji-picker button:active{transform:scale(.92)}
 
-  /* ───────── cursors ───────── */
+  /* ───── cursors ───── */
   #cursors{position:fixed; inset:0; pointer-events:none; z-index:9500}
   .cursor{
     position:absolute; top:0; left:0; will-change:transform;
@@ -261,7 +299,7 @@
     white-space:nowrap; letter-spacing:.03em;
   }
 
-  /* ───────── emoji burst ───────── */
+  /* ───── emoji burst ───── */
   .emoji{
     position:fixed; font-size:26px; pointer-events:none; z-index:9600;
     animation:floatUp 1.6s cubic-bezier(.2,.8,.3,1) forwards;
@@ -271,48 +309,93 @@
     18% {transform:translate(-50%,-62%) scale(1.25); opacity:1}
     100%{transform:translate(-50%,-260%) scale(.9); opacity:0}
   }
-  .burst{
+  .spark{
     position:fixed; width:6px; height:6px; border-radius:50%;
     pointer-events:none; z-index:9550;
-    animation:burst .7s ease-out forwards;
+    animation:spark .72s ease-out forwards;
   }
-  @keyframes burst{
+  @keyframes spark{
     0%  {transform:translate(-50%,-50%) scale(1); opacity:1}
     100%{transform:translate(calc(-50% + var(--bx)), calc(-50% + var(--by))) scale(0); opacity:0}
   }
 
-  /* ───────── empty state ───────── */
+  /* ───── empty state ───── */
   #hint{
     position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
     text-align:center; pointer-events:none; user-select:none;
-    transition:opacity .5s;
+    transition:opacity .5s; width:min(320px, 90vw);
   }
   #hint.hide{opacity:0}
   #hint h2{
-    margin:0 0 10px; font-size:26px; letter-spacing:.04em; font-weight:800;
+    margin:0 0 10px; font-size:24px; letter-spacing:.04em; font-weight:800;
     background:linear-gradient(120deg,#8b5cff,#4dd4ff,#ff6b9d);
     -webkit-background-clip:text; background-clip:text; color:transparent;
     animation:hue 6s linear infinite;
   }
   @keyframes hue{to{filter:hue-rotate(360deg)}}
-  #hint p{margin:0; font-size:13px; color:#6a6a86}
+  #hint p{margin:0; font-size:13px; color:#6a6a86; line-height:1.6}
   #hint kbd{
     font-family:inherit; font-size:11px; font-weight:700;
-    background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12);
+    background:rgba(255,255,255,.08);
+    border:1px solid rgba(255,255,255,.12);
     border-radius:5px; padding:1px 6px; margin:0 2px; color:#c9c9e0;
   }
 
-  /* ───────── toasts ───────── */
+  /* ───── toasts ───── */
   #toasts{
     position:fixed; left:50%; bottom:26px; transform:translateX(-50%);
-    z-index:9800; display:flex; flex-direction:column; gap:8px; align-items:center;
-    pointer-events:none;
+    z-index:9800; display:flex; flex-direction:column; gap:8px;
+    align-items:center; pointer-events:none;
+    padding-bottom:env(safe-area-inset-bottom);
+    max-width:92vw;
   }
   .toast{
     font-size:13px; padding:10px 16px; border-radius:12px; color:#fff;
-    background:rgba(30,20,45,.94); border:1px solid rgba(255,120,150,.35);
+    background:rgba(30,20,45,.94);
+    border:1px solid rgba(255,120,150,.35);
     box-shadow:0 14px 40px -12px #000;
     animation:popIn .25s ease both;
+    text-align:center;
+  }
+
+  /* ══════════════════════════════════════════
+     MOBILE — clean, tappable, thumb-friendly
+     ══════════════════════════════════════════ */
+  @media (max-width: 640px) {
+    #bar{
+      height:56px; padding:0 10px; gap:8px;
+    }
+    .brand{font-size:11px; letter-spacing:.16em; gap:7px}
+    .brand .orb{width:11px; height:11px}
+    #ticker{font-size:11.5px}
+    .right{gap:6px}
+    .status{display:none}
+    .btn{padding:8px 12px; font-size:12.5px; border-radius:10px}
+    .btn.icon{padding:8px 10px}
+    .avatar{width:26px; height:26px; font-size:10px}
+
+    /* notes smaller + always-interactive */
+    .note{padding:9px 11px 10px; border-radius:14px}
+    .note-head{height:26px}
+    .body{font-size:15px; max-height:44vh; margin-top:4px}
+    .acts{opacity:1} /* no hover on touch */
+    .acts button{width:26px; height:26px; font-size:13px}
+
+    .react-bar{gap:6px; margin-top:9px}
+    .react-chip{padding:4px 10px 5px; font-size:14px}
+    .react-chip b{font-size:12px}
+    .react-add{width:30px; height:30px; font-size:17px}
+
+    .emoji-picker{padding:8px; gap:3px}
+    .emoji-picker button{width:44px; height:44px; font-size:24px}
+
+    #hint h2{font-size:20px}
+    #hint p{font-size:12px}
+  }
+
+  /* very short phones */
+  @media (max-height: 500px) {
+    #hint{display:none}
   }
 </style>
 </head>
@@ -322,7 +405,10 @@
 <div id="canvas">
   <div id="hint">
     <h2>the wall is waiting</h2>
-    <p>Press <kbd>N</kbd> · or double-click anywhere · or hit <strong>+ Note</strong></p>
+    <p>
+      <kbd>N</kbd> · or double-tap · or <strong>+ Note</strong><br>
+      drag the top of a note · tap <strong>+</strong> to react
+    </p>
   </div>
 </div>
 
@@ -330,7 +416,7 @@
 
 <header id="bar">
   <div class="brand"><span class="orb"></span> NEBULA</div>
-  <div id="ticker"><span class="dot"></span><span id="tickerText"></span></div>
+  <div id="ticker"><span class="dot" id="tickerDot"></span><span id="tickerText"></span></div>
   <div class="right">
     <div class="people" id="people"></div>
     <span class="status" id="status"><i></i><span id="statusText">connecting</span></span>
@@ -344,18 +430,19 @@
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-/* ══════════════════════════ config ══════════════════════════ */
+/* ══════════════════════ config ══════════════════════ */
 const SUPABASE_URL = 'https://piexelytvvfsoeqhlokb.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_neiQC042cfc6Io2r8Cf6hw_WoecdytJ';
 
-/* ══════════════════════════ helpers ══════════════════════════ */
-const $  = s => document.querySelector(s);
+/* ══════════════════════ helpers ══════════════════════ */
+const $    = s => document.querySelector(s);
 const pick = a => a[Math.floor(Math.random() * a.length)];
 const uid  = () => crypto.randomUUID?.() ?? 'id-' + Math.random().toString(36).slice(2) + Date.now();
 const hexA = (h, a) => {
   const n = parseInt(h.slice(1), 16);
   return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`;
 };
+const isMobile = () => innerWidth < 640;
 
 const PALETTE = ['yellow','pink','cyan','green','violet','orange'];
 const HEX = {
@@ -365,9 +452,9 @@ const HEX = {
 const NAMES = ['Nova','Comet','Pulsar','Quasar','Orion','Vega','Lyra','Atlas',
                'Rigel','Sirius','Zenith','Cosmo','Astra','Nyx','Echo','Meteor',
                'Phoenix','Hydra','Indigo','Sol','Luna'];
-const REACTS = ['✨','🔥','💜','🚀','🎯','💡'];
+const REACTS = ['✨','🔥','💜','🚀','🎯','💡','😂','👍','❤️','🎉'];
 
-/* ══════════════════════════ identity ══════════════════════════ */
+/* ══════════════════════ identity ══════════════════════ */
 let me;
 try { me = JSON.parse(sessionStorage.getItem('nebula.me')); } catch {}
 if (!me) {
@@ -375,40 +462,35 @@ if (!me) {
   sessionStorage.setItem('nebula.me', JSON.stringify(me));
 }
 
-/* ══════════════════════════ state ══════════════════════════ */
+/* ══════════════════════ state ══════════════════════ */
 const canvas  = $('#canvas');
 const cursors = $('#cursors');
 const notes   = new Map();
 let sb, room, zTop = 10;
 let moveBuf=null, moveTimer=null, cursorBuf=null, cursorTimer=null;
 let soundOn = localStorage.getItem('nebula.mute') !== '1';
+const typingUsers = new Map(); // userId -> { name, color, noteId, timer }
 
-/* ══════════════════════════ sound ══════════════════════════ */
+/* ══════════════════════ sound ══════════════════════ */
 let actx;
 function blip(freq = 880, dur = 0.07, type = 'sine', gain = 0.045) {
   if (!soundOn) return;
   try {
     if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
-    const o = actx.createOscillator();
-    const g = actx.createGain();
-    o.type = type;
-    o.frequency.value = freq;
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = type; o.frequency.value = freq;
     g.gain.setValueAtTime(gain, actx.currentTime);
     g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + dur);
     o.connect(g).connect(actx.destination);
-    o.start();
-    o.stop(actx.currentTime + dur);
+    o.start(); o.stop(actx.currentTime + dur);
   } catch {}
 }
-function chord(freqs, dur = 0.14) {
-  freqs.forEach((f, i) => setTimeout(() => blip(f, dur), i * 22));
-}
+const chord = (f, d=0.14) => f.forEach((x,i) => setTimeout(() => blip(x, d), i*22));
 
-/* ══════════════════════════ toast ══════════════════════════ */
+/* ══════════════════════ toast + ticker ══════════════════════ */
 function toast(msg) {
   const el = document.createElement('div');
-  el.className = 'toast';
-  el.textContent = msg;
+  el.className = 'toast'; el.textContent = msg;
   $('#toasts').appendChild(el);
   setTimeout(() => {
     el.style.transition = 'opacity .3s, transform .3s';
@@ -417,18 +499,17 @@ function toast(msg) {
     setTimeout(() => el.remove(), 320);
   }, 4200);
 }
-
-/* ══════════════════════════ ticker ══════════════════════════ */
 let tickTimer;
-function tick(html) {
-  const el = $('#ticker');
+function tick(html, pulsing = false) {
   $('#tickerText').innerHTML = html;
+  const el = $('#ticker');
+  $('#tickerDot').classList.toggle('pulse', pulsing);
   el.classList.add('show');
   clearTimeout(tickTimer);
   tickTimer = setTimeout(() => el.classList.remove('show'), 3600);
 }
 
-/* ══════════════════════════ status ══════════════════════════ */
+/* ══════════════════════ status ══════════════════════ */
 function setStatus(state) {
   const el = $('#status'), txt = $('#statusText');
   el.classList.remove('live','dead');
@@ -437,25 +518,26 @@ function setStatus(state) {
   else { txt.textContent = 'connecting'; }
 }
 
-/* ══════════════════════════ sizing ══════════════════════════ */
-/* Notes auto-size: width grows with content length via sqrt curve, height
-   follows content naturally. Long text → wide note → wraps → taller.       */
+/* ══════════════════════ sizing ══════════════════════ */
 function autoSize(entry) {
   const text = (entry.data.text || '').trim();
   const len  = text.length;
   const longest = text ? Math.max(...text.split('\n').map(l => l.length)) : 0;
 
-  let w = 190;
+  const MIN = isMobile() ? 148 : 170;
+  const MAX = isMobile() ? Math.min(320, innerWidth - 40) : 380;
+
+  let w = MIN;
   if (len > 0) {
     const byTotal = 100 + Math.sqrt(len) * 30;
     const byLine  = Math.min(longest, 42) * 8.4 + 60;
     w = Math.max(byTotal, byLine);
   }
-  w = Math.min(380, Math.max(170, Math.round(w)));
+  w = Math.min(MAX, Math.max(MIN, Math.round(w)));
   entry.el.style.width = w + 'px';
 }
 
-/* ══════════════════════════ note render ══════════════════════════ */
+/* ══════════════════════ note render ══════════════════════ */
 function setPos(el, x, y, rot = 0) {
   el.style.setProperty('--tx', x + 'px');
   el.style.setProperty('--ty', y + 'px');
@@ -475,11 +557,11 @@ function renderNote(entry) {
   const text = data.text || '';
   if (document.activeElement !== body && body.innerText !== text) body.innerText = text;
 
-  const who = el.querySelector('.who');
-  who.textContent = data.author || '?';
+  el.querySelector('.who').textContent = data.author || '?';
 
   autoSize(entry);
   renderReactions(entry);
+  renderTypingOnNote(entry);
 }
 
 function createNoteEl(data) {
@@ -488,7 +570,11 @@ function createNoteEl(data) {
   el.dataset.id = data.id;
   el.innerHTML = `
     <header class="note-head">
-      <div class="author"><span class="dot"></span><span class="who"></span></div>
+      <div class="author">
+        <span class="dot"></span>
+        <span class="who"></span>
+        <span class="typing-dots"></span>
+      </div>
       <div class="acts">
         <button class="a-color" title="Recolour">◐</button>
         <button class="a-del"   title="Delete">✕</button>
@@ -519,6 +605,8 @@ function dropNote(id) {
   const entry = notes.get(id);
   if (!entry) return;
   notes.delete(id);
+  // clear typing for that note
+  typingUsers.forEach((v, k) => { if (v.noteId === id) { clearTimeout(v.timer); typingUsers.delete(k); } });
   const el = entry.el;
   el.style.pointerEvents = 'none';
   el.classList.add('gone');
@@ -526,13 +614,16 @@ function dropNote(id) {
   updateEmpty();
 }
 
-function updateEmpty() { $('#hint').classList.toggle('hide', notes.size > 0); }
-function bringFront(entry) { entry.el.style.zIndex = ++zTop; }
+const updateEmpty = () => $('#hint').classList.toggle('hide', notes.size > 0);
+const bringFront  = entry => entry.el.style.zIndex = ++zTop;
 
-/* ══════════════════════════ reactions ══════════════════════════ */
+/* ══════════════════════ reactions ══════════════════════ */
 function renderReactions(entry) {
-  closePicker();
   const bar = entry.el.querySelector('.react-bar');
+  // if the picker for THIS note is open, don't blow it away mid-interaction
+  const openFor = document.querySelector('.emoji-picker');
+  if (openFor && openFor.dataset.noteId === entry.data.id) return;
+
   const r = entry.data.reactions || {};
   bar.innerHTML = '';
 
@@ -548,8 +639,10 @@ function renderReactions(entry) {
 
   const add = document.createElement('button');
   add.className = 'react-add';
+  add.type = 'button';
   add.textContent = '+';
-  add.title = 'React';
+  add.title = 'Add reaction';
+  add.setAttribute('aria-label', 'Add reaction');
   add.onclick = e => { e.stopPropagation(); openPicker(entry, add); };
   bar.appendChild(add);
 }
@@ -561,70 +654,86 @@ async function toggleReaction(noteId, emoji) {
   const reactions = { ...(entry.data.reactions || {}) };
   const arr = Array.isArray(reactions[emoji]) ? [...reactions[emoji]] : [];
   const i = arr.indexOf(me.id);
-  if (i >= 0) arr.splice(i, 1);
-  else arr.push(me.id);
-
-  if (arr.length) reactions[emoji] = arr;
-  else delete reactions[emoji];
-
   const added = i < 0;
+  if (added) arr.push(me.id); else arr.splice(i, 1);
+
+  if (arr.length) reactions[emoji] = arr; else delete reactions[emoji];
+
   entry.data.reactions = reactions;
   renderReactions(entry);
 
-  if (added) {
-    burst(entry, emoji);
-    blip(720 + Math.random() * 220, 0.06, 'triangle', 0.04);
-  } else {
-    blip(420, 0.05, 'sine', 0.03);
-  }
+  if (added) { burst(entry, emoji); blip(720 + Math.random() * 220, 0.06, 'triangle', 0.04); }
+  else blip(420, 0.05, 'sine', 0.03);
 
   const { error } = await sb.from('notes').update({ reactions }).eq('id', noteId);
-  if (error) toast(error.message);
+  if (error) {
+    toast(/reactions/i.test(error.message)
+      ? 'Run the SQL to add the `reactions` column.'
+      : error.message);
+  }
 }
 
+/* ══════════════════════ picker ══════════════════════ */
 function openPicker(entry, anchor) {
+  const already = document.querySelector(`.emoji-picker[data-note-id="${entry.data.id}"]`);
+  if (already) { closePicker(); return; }
   closePicker();
+
   const picker = document.createElement('div');
   picker.className = 'emoji-picker';
-  REACTS.forEach(e => {
+  picker.dataset.noteId = entry.data.id;
+
+  // CRUCIAL: stop pointerdown from bubbling to document → keeps the picker alive
+  picker.addEventListener('pointerdown', e => e.stopPropagation());
+  picker.addEventListener('click',      e => e.stopPropagation());
+
+  REACTS.forEach(em => {
     const b = document.createElement('button');
-    b.textContent = e;
+    b.type = 'button';
+    b.textContent = em;
     b.onclick = ev => {
       ev.stopPropagation();
-      toggleReaction(entry.data.id, e);
+      toggleReaction(entry.data.id, em);
       closePicker();
     };
     picker.appendChild(b);
   });
+
   document.body.appendChild(picker);
 
-  const r = anchor.getBoundingClientRect();
-  const pw = picker.offsetWidth || 220;
-  picker.style.left = Math.max(8, Math.min(innerWidth - pw - 8, r.left - pw / 2 + r.width / 2)) + 'px';
-  picker.style.top  = Math.max(8, r.top - 46) + 'px';
+  // position it
+  const r  = anchor.getBoundingClientRect();
+  const pw = picker.offsetWidth  || 260;
+  const ph = picker.offsetHeight || 44;
+  let left = r.left + r.width / 2 - pw / 2;
+  let top  = r.top - ph - 10;
+  left = Math.max(8, Math.min(innerWidth  - pw - 8, left));
+  if (top < 64) top = r.bottom + 10;
+  if (top + ph > innerHeight - 8) top = innerHeight - ph - 8;
+  picker.style.left = left + 'px';
+  picker.style.top  = top + 'px';
 
+  // close on outside tap (added *after* the current event cycle finishes)
   setTimeout(() => {
-    document.addEventListener('pointerdown', closePicker, { once: true });
+    document.addEventListener('pointerdown', closePicker, { once: true, capture: true });
   }, 0);
 }
 function closePicker() {
   document.querySelectorAll('.emoji-picker').forEach(p => p.remove());
 }
 
-/* ══════════════════════════ bursts ══════════════════════════ */
+/* ══════════════════════ bursts ══════════════════════ */
 function burst(entry, emoji) {
   const rect = entry.el.getBoundingClientRect();
   const cx = rect.left + rect.width / 2;
   const cy = rect.top + rect.height / 2;
 
-  // center emoji rise
   spawnEmoji(cx, cy, emoji);
 
-  // sparkle particles
   const hex = HEX[entry.data.color] || '#fff';
   for (let i = 0; i < 8; i++) {
     const p = document.createElement('div');
-    p.className = 'burst';
+    p.className = 'spark';
     p.style.left = cx + 'px';
     p.style.top  = cy + 'px';
     p.style.background = hex;
@@ -634,10 +743,9 @@ function burst(entry, emoji) {
     p.style.setProperty('--bx', Math.cos(ang) * dist + 'px');
     p.style.setProperty('--by', Math.sin(ang) * dist + 'px');
     document.body.appendChild(p);
-    setTimeout(() => p.remove(), 720);
+    setTimeout(() => p.remove(), 780);
   }
 }
-
 function spawnEmoji(x, y, emoji) {
   const el = document.createElement('div');
   el.className = 'emoji';
@@ -648,7 +756,43 @@ function spawnEmoji(x, y, emoji) {
   setTimeout(() => el.remove(), 1700);
 }
 
-/* ══════════════════════════ wire note ══════════════════════════ */
+/* ══════════════════════ typing indicators ══════════════════════ */
+function renderTypingOnNote(entry) {
+  const host = entry.el.querySelector('.typing-dots');
+  const users = [...typingUsers.values()].filter(u => u.noteId === entry.data.id && u.id !== me.id);
+  host.innerHTML = '';
+  users.slice(0, 4).forEach(u => {
+    const d = document.createElement('i');
+    d.style.background = u.color;
+    d.style.boxShadow  = `0 0 8px ${u.color}`;
+    host.appendChild(d);
+  });
+}
+
+function renderTypingAll() {
+  notes.forEach(renderTypingOnNote);
+  const others = [...typingUsers.values()].filter(u => u.id !== me.id);
+  if (others.length) {
+    const names = [...new Set(others.map(u => u.name))].slice(0, 3);
+    const label = names.length === 1
+      ? `<b style="color:${others[0].color}">${names[0]}</b> is typing…`
+      : `<b style="color:${others[0].color}">${names[0]}</b> + ${others.length - 1} typing…`;
+    tick(label, true);
+  }
+}
+
+function markTyping(payload) {
+  const existing = typingUsers.get(payload.id);
+  if (existing?.timer) clearTimeout(existing.timer);
+  const timer = setTimeout(() => {
+    typingUsers.delete(payload.id);
+    renderTypingAll();
+  }, 2200);
+  typingUsers.set(payload.id, { ...payload, timer });
+  renderTypingAll();
+}
+
+/* ══════════════════════ wire note ══════════════════════ */
 function wireNote(entry) {
   const { el, data } = entry;
   const head = el.querySelector('.note-head');
@@ -659,32 +803,24 @@ function wireNote(entry) {
   /* ── drag ── */
   head.addEventListener('pointerdown', e => {
     if (e.target.closest('button')) return;
-    e.preventDefault();
+    if (document.activeElement !== body) e.preventDefault();
     bringFront(entry);
     el.classList.add('dragging');
-    head.setPointerCapture(e.pointerId);
+    try { head.setPointerCapture(e.pointerId); } catch {}
 
     const sx = e.clientX, sy = e.clientY;
     const ox = data.x, oy = data.y;
-    let moved = false;
-    let lastX = sx;
+    let moved = false, lastX = sx;
 
     const onMove = ev => {
       const dx = ev.clientX - sx, dy = ev.clientY - sy;
       if (!moved && Math.abs(dx) + Math.abs(dy) > 3) moved = true;
-
-      data.x = ox + dx;
-      data.y = oy + dy;
-
-      // slight tilt based on horizontal velocity
-      const vx = ev.clientX - lastX;
-      lastX = ev.clientX;
+      data.x = ox + dx; data.y = oy + dy;
+      const vx = ev.clientX - lastX; lastX = ev.clientX;
       const rot = Math.max(-5, Math.min(5, vx * 0.35));
-
       setPos(el, data.x, data.y, rot);
       queueMove(data.id, data.x, data.y);
     };
-
     const onUp = async () => {
       head.removeEventListener('pointermove', onMove);
       head.removeEventListener('pointerup', onUp);
@@ -695,7 +831,6 @@ function wireNote(entry) {
       const { error } = await sb.from('notes').update({ x: data.x, y: data.y }).eq('id', data.id);
       if (error) toast(error.message);
     };
-
     head.addEventListener('pointermove', onMove);
     head.addEventListener('pointerup', onUp);
     head.addEventListener('pointercancel', onUp);
@@ -706,8 +841,20 @@ function wireNote(entry) {
     if (e.key === 'Escape') body.blur();
   });
 
-  // auto-grow while typing
-  body.addEventListener('input', () => autoSize(entry));
+  let lastSent = 0;
+  body.addEventListener('input', () => {
+    autoSize(entry);
+    const now = Date.now();
+    if (now - lastSent > 350) {
+      lastSent = now;
+      room?.send({
+        type: 'broadcast', event: 'typing',
+        payload: { id: me.id, name: me.name, color: me.color, noteId: data.id }
+      });
+    }
+  });
+
+  body.addEventListener('focus', () => bringFront(entry));
 
   body.addEventListener('blur', async () => {
     const text = body.innerText.replace(/\n{3,}/g, '\n\n').trim();
@@ -747,10 +894,11 @@ async function removeNote(id) {
   if (error) toast(error.message);
 }
 
-/* ══════════════════════════ create ══════════════════════════ */
+/* ══════════════════════ create ══════════════════════ */
 async function addNote(atX, atY) {
-  const x = atX ?? Math.max(20, Math.min(innerWidth  - 240, innerWidth  / 2 - 95 + (Math.random()*220-110)));
-  const y = atY ?? Math.max(80, Math.min(innerHeight - 220, innerHeight / 2 - 70 + (Math.random()*160-80)));
+  const w = isMobile() ? 180 : 200;
+  const x = atX ?? Math.max(12, Math.min(innerWidth  - w - 12, innerWidth  / 2 - w/2 + (Math.random()*200-100)));
+  const y = atY ?? Math.max(74, Math.min(innerHeight - 200, innerHeight / 2 - 60 + (Math.random()*140-70)));
   const color = pick(PALETTE);
 
   const { data, error } = await sb.from('notes')
@@ -768,22 +916,37 @@ async function addNote(atX, atY) {
 
 $('#add').onclick = () => addNote();
 
-/* double-click empty canvas → note there */
 canvas.addEventListener('dblclick', e => {
-  if (e.target.closest('.note')) return;
-  addNote(e.clientX - 95, e.clientY - 40);
+  if (e.target.closest('.note, .emoji-picker')) return;
+  addNote(e.clientX - 90, e.clientY - 30);
 });
 
-/* keyboard shortcut */
+/* double-TAP on mobile — dblclick fires if user-scalable=no, but be safe */
+let lastTap = 0, lastTapX = 0, lastTapY = 0;
+canvas.addEventListener('touchend', e => {
+  if (!isMobile()) return;
+  if (e.target.closest('.note, .emoji-picker, button')) return;
+  const t = e.changedTouches[0];
+  if (!t) return;
+  const now = Date.now();
+  if (now - lastTap < 300 && Math.hypot(t.clientX - lastTapX, t.clientY - lastTapY) < 40) {
+    addNote(t.clientX - 90, t.clientY - 30);
+    lastTap = 0;
+  } else {
+    lastTap = now; lastTapX = t.clientX; lastTapY = t.clientY;
+  }
+}, { passive: true });
+
 addEventListener('keydown', e => {
   const typing = e.target.closest('input, textarea, [contenteditable="true"]');
   if (typing) return;
   if (e.key === 'n' || e.key === 'N') { e.preventDefault(); addNote(); }
+  if (e.key === 'Escape') closePicker();
 });
 
-/* mute toggle */
+/* mute */
 const muteBtn = $('#mute');
-function paintMute(){ muteBtn.textContent = soundOn ? '🔊' : '🔇'; }
+const paintMute = () => muteBtn.textContent = soundOn ? '🔊' : '🔇';
 muteBtn.onclick = () => {
   soundOn = !soundOn;
   localStorage.setItem('nebula.mute', soundOn ? '0' : '1');
@@ -792,7 +955,7 @@ muteBtn.onclick = () => {
 };
 paintMute();
 
-/* ══════════════════════════ broadcasts ══════════════════════════ */
+/* ══════════════════════ broadcast queues ══════════════════════ */
 function queueMove(id, x, y) {
   moveBuf = { id, x, y };
   if (moveTimer) return;
@@ -810,9 +973,9 @@ addEventListener('pointermove', e => {
     cursorTimer = null;
     if (cursorBuf) { room.send({ type:'broadcast', event:'cursor', payload: cursorBuf }); cursorBuf = null; }
   }, 55);
-}, { passive:true });
+}, { passive: true });
 
-/* ══════════════════════════ cursors ══════════════════════════ */
+/* ══════════════════════ cursors ══════════════════════ */
 const cursorEls = new Map();
 function drawCursor(p) {
   if (p.id === me.id) return;
@@ -834,21 +997,20 @@ function drawCursor(p) {
   const tag = el.querySelector('.tag');
   tag.textContent = p.name;
   tag.style.background = p.color;
-
   clearTimeout(el._kill);
   el._kill = setTimeout(() => { el.remove(); cursorEls.delete(p.id); }, 7000);
 }
 
-/* ══════════════════════════ presence ══════════════════════════ */
+/* ══════════════════════ presence ══════════════════════ */
 let lastUsers = 0;
 function renderPeople() {
   if (!room) return;
-  const state = room.presenceState();
-  const users = Object.values(state).flat();
+  const users = Object.values(room.presenceState()).flat();
   const box = $('#people');
   box.innerHTML = '';
+  const max = isMobile() ? 3 : 6;
 
-  users.slice(0, 6).forEach(u => {
+  users.slice(0, max).forEach(u => {
     const d = document.createElement('div');
     d.className = 'avatar';
     d.style.background = u.color || '#888';
@@ -856,15 +1018,13 @@ function renderPeople() {
     d.title = u.name || '';
     box.appendChild(d);
   });
-  if (users.length > 6) {
+  if (users.length > max) {
     const d = document.createElement('div');
     d.className = 'avatar more';
-    d.textContent = '+' + (users.length - 6);
+    d.textContent = '+' + (users.length - max);
     box.appendChild(d);
   }
-
-  const txt = $('#statusText');
-  if ($('#status').classList.contains('live')) txt.textContent = users.length + ' here';
+  if ($('#status').classList.contains('live')) $('#statusText').textContent = users.length + ' here';
 
   if (users.length > lastUsers && lastUsers > 0) {
     const newest = users.find(u => u.id !== me.id);
@@ -873,22 +1033,23 @@ function renderPeople() {
   lastUsers = users.length;
 }
 
-/* ══════════════════════════ boot ══════════════════════════ */
+/* ══════════════════════ boot ══════════════════════ */
 async function boot() {
   const url = SUPABASE_URL.replace(/\/+$/,'').replace(/\/rest\/v1$/,'');
   sb = createClient(url, SUPABASE_KEY, { realtime: { params: { eventsPerSecond: 25 } } });
 
-  /* initial load */
-  const { data, error } = await sb.from('notes').select('*').order('created_at', { ascending:true });
-  if (error) {
-    toast('DB error: ' + error.message);
-    console.error(error);
-    return;
+  /* check schema */
+  const probe = await sb.from('notes').select('id,reactions').limit(1);
+  if (probe.error && /reactions/i.test(probe.error.message)) {
+    toast('Missing `reactions` column — run the SQL.');
   }
+
+  const { data, error } = await sb.from('notes').select('*').order('created_at', { ascending:true });
+  if (error) { toast('DB error: ' + error.message); console.error(error); return; }
   data.forEach(upsertNote);
   updateEmpty();
 
-  /* realtime: rows */
+  /* rows realtime */
   sb.channel('nebula-db')
     .on('postgres_changes', { event:'*', schema:'public', table:'notes' }, payload => {
       if (payload.eventType === 'DELETE') dropNote(payload.old.id);
@@ -896,7 +1057,7 @@ async function boot() {
     })
     .subscribe();
 
-  /* realtime: presence + broadcast */
+  /* presence + broadcast */
   room = sb.channel('nebula-room', { config: { presence: { key: me.id } } });
   room
     .on('presence', { event:'sync' }, renderPeople)
@@ -907,6 +1068,7 @@ async function boot() {
       entry.data.x = payload.x; entry.data.y = payload.y;
       setPos(entry.el, payload.x, payload.y);
     })
+    .on('broadcast', { event:'typing' }, ({ payload }) => markTyping(payload))
     .on('broadcast', { event:'react' }, ({ payload }) => {
       spawnEmoji(payload.x, payload.y, payload.emoji);
       blip(760, 0.05, 'triangle', 0.03);
@@ -921,6 +1083,22 @@ async function boot() {
     });
 
   addEventListener('beforeunload', () => room?.untrack());
+
+  /* reposition notes on resize / orientation change */
+  addEventListener('resize', () => {
+    notes.forEach(entry => {
+      autoSize(entry);
+      const maxX = innerWidth  - entry.el.offsetWidth  - 8;
+      const maxY = innerHeight - entry.el.offsetHeight - 8;
+      if (entry.data.x > maxX) entry.data.x = Math.max(8, maxX);
+      if (entry.data.y > maxY) entry.data.y = Math.max(70, maxY);
+      setPos(entry.el, entry.data.x, entry.data.y);
+    });
+    closePicker();
+  });
+
+  /* tap-away closes picker globally */
+  document.addEventListener('scroll', closePicker, true);
 }
 
 boot();
