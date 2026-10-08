@@ -13,11 +13,11 @@
     font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Inter,Roboto,sans-serif;
     background:#08080f; -webkit-font-smoothing:antialiased;
     user-select:none; -webkit-user-select:none;
-    font-feature-settings:"ss01","cv01";
   }
   button{font-family:inherit;touch-action:manipulation}
+  input{font-family:inherit}
 
-  /* ═══ background ═══ */
+  /* ═══ bg ═══ */
   #bg{
     position:fixed; inset:0; z-index:0; pointer-events:none;
     background:
@@ -48,10 +48,9 @@
 
   /* ═══ top bar ═══ */
   #bar{
-    position:fixed; top:0; left:0; right:0;
-    z-index:9000;
+    position:fixed; top:0; left:0; right:0; z-index:9000;
     padding:0 16px;
-    height:calc(60px + env(safe-area-inset-top));
+    height:calc(64px + env(safe-area-inset-top));
     padding-top:env(safe-area-inset-top);
     display:flex; align-items:center; gap:14px;
     background:linear-gradient(180deg, rgba(8,8,15,.95), rgba(8,8,15,.55) 65%, transparent);
@@ -60,10 +59,9 @@
   }
   .brand{
     display:flex; align-items:center; gap:10px;
-    font-weight:800; letter-spacing:.3em; font-size:12px; flex-shrink:0;
-    color:#fff;
+    font-weight:800; letter-spacing:.3em; font-size:12px; flex-shrink:0; color:#fff;
   }
-  .orb{
+  .brand .orb{
     width:10px; height:10px; border-radius:50%;
     background:radial-gradient(circle at 30% 30%, #fff, #8b5cf6 50%, #2dd4bf);
     box-shadow:0 0 14px #8b5cf6, 0 0 28px rgba(139,92,246,.5);
@@ -71,39 +69,85 @@
   }
   @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:.6}}
 
-  #meta{
-    flex:1; min-width:0;
-    display:flex; align-items:center; justify-content:center; gap:8px;
-    font-size:12px; color:#8a8aa0;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  /* room pill */
+  .room-pill{
+    display:inline-flex; align-items:center; gap:5px;
+    padding:4px 10px; border-radius:99px;
+    font-size:10.5px; font-weight:700; letter-spacing:.06em;
+    color:#a78bfa; background:rgba(139,92,246,.1);
+    border:1px solid rgba(139,92,246,.25);
+    cursor:pointer; transition:.14s; flex-shrink:0;
+    max-width:140px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
-  #meta .sep{opacity:.35}
-  #meta b{color:#c9c9dd; font-weight:700}
+  .room-pill:hover{background:rgba(139,92,246,.18); color:#c4b5fd}
+  .room-pill::before{content:"#"; opacity:.6}
 
-  .right{display:flex; align-items:center; gap:8px; flex-shrink:0}
-  .people{display:flex; align-items:center; padding-left:9px}
-  .avatar{
-    width:26px; height:26px; border-radius:50%; margin-left:-8px;
-    display:grid; place-items:center; font-size:10px; font-weight:800;
-    border:2px solid #08080f; color:#08080f;
-    box-shadow:0 0 10px -2px currentColor;
-    animation:pop .3s cubic-bezier(.2,1.5,.4,1);
+  .spacer{flex:1; min-width:0}
+
+  /* ═══ presence — v1 style, big and clear ═══ */
+  .people{
+    display:flex; align-items:center; gap:10px; flex-shrink:0;
   }
+  .avatars{
+    display:flex; align-items:center; padding-left:10px;
+  }
+  .avatar{
+    position:relative;
+    width:32px; height:32px; border-radius:50%;
+    margin-left:-10px;
+    display:grid; place-items:center;
+    font-size:12px; font-weight:800;
+    color:#08080f;
+    border:2.5px solid #08080f;
+    box-shadow:0 0 14px -3px currentColor;
+    animation:pop .32s cubic-bezier(.2,1.5,.4,1);
+    transition:transform .16s, z-index 0s;
+    cursor:default;
+  }
+  .avatar:hover{transform:translateY(-3px) scale(1.1); z-index:5}
   .avatar:first-child{margin-left:0}
-  .avatar.more{background:#1e1e30 !important; color:#a8a8c0 !important}
+  .avatar.more{background:#1a1a2a !important; color:#a8a8c0 !important}
   @keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
 
-  .status{
-    display:flex; align-items:center; gap:6px;
-    font-size:10.5px; font-weight:700; color:#8a8aa0;
-    letter-spacing:.1em; text-transform:uppercase;
-    padding:5px 10px; border-radius:99px;
-    background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06);
+  .avatar .dot{
+    position:absolute; right:-2px; bottom:-2px;
+    width:10px; height:10px; border-radius:50%;
+    background:#34d399;
+    border:2px solid #08080f;
+    box-shadow:0 0 6px #34d399;
+    animation:liveDot 2s ease-in-out infinite;
   }
-  .status i{width:6px; height:6px; border-radius:50%; background:#555; transition:.3s}
-  .status.live i{background:#34d399; box-shadow:0 0 8px #34d399}
-  .status.dead i{background:#f87171; box-shadow:0 0 8px #f87171}
+  @keyframes liveDot{0%,100%{opacity:1}50%{opacity:.5}}
 
+  .avatar .tag{
+    position:absolute; left:50%; bottom:calc(100% + 8px);
+    transform:translateX(-50%);
+    padding:4px 9px; border-radius:7px;
+    font-size:10px; font-weight:800; letter-spacing:.05em;
+    color:#08080f; white-space:nowrap;
+    opacity:0; pointer-events:none; transition:.16s;
+    z-index:10;
+  }
+  .avatar .tag::after{
+    content:""; position:absolute; left:50%; top:100%;
+    transform:translateX(-50%);
+    border:4px solid transparent; border-top-color:currentColor;
+  }
+  .avatar:hover .tag{opacity:1}
+
+  .online-label{
+    font-size:11px; font-weight:700; color:#34d399;
+    letter-spacing:.08em; text-transform:uppercase;
+    display:flex; align-items:center; gap:5px;
+    white-space:nowrap;
+  }
+  .online-label i{
+    width:6px; height:6px; border-radius:50%; background:#34d399;
+    box-shadow:0 0 8px #34d399;
+    animation:liveDot 2s ease-in-out infinite;
+  }
+
+  /* buttons */
   .btn{
     all:unset; cursor:pointer; font-size:13px; font-weight:600; color:#eaeaf2;
     padding:8px 14px; border-radius:10px; text-align:center;
@@ -120,6 +164,36 @@
   .btn.primary:hover{box-shadow:0 8px 28px -6px rgba(139,92,246,.9)}
   .btn.icon{padding:8px 10px; font-size:14px; line-height:1}
 
+  /* search drawer */
+  #searchbar{
+    position:fixed; top:calc(64px + env(safe-area-inset-top)); left:0; right:0;
+    z-index:8990; padding:10px 16px;
+    background:linear-gradient(180deg, rgba(8,8,15,.96), rgba(8,8,15,.85));
+    -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+    border-bottom:1px solid rgba(255,255,255,.06);
+    display:none; gap:10px; align-items:center;
+    transform:translateY(-8px); opacity:0;
+    transition:transform .2s, opacity .2s;
+  }
+  #searchbar.show{display:flex; transform:translateY(0); opacity:1}
+  #searchbar input{
+    flex:1; padding:9px 14px; border-radius:10px;
+    font-size:14px; color:#eaeaf2;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.1);
+    outline:none; transition:.15s;
+  }
+  #searchbar input:focus{
+    border-color:#8b5cf6;
+    box-shadow:0 0 0 3px rgba(139,92,246,.18);
+  }
+  #searchbar input::placeholder{color:#55556e}
+  #searchbar .hits{
+    font-size:11.5px; font-weight:700; color:#8a8aa0;
+    padding:0 6px; white-space:nowrap;
+  }
+  #searchbar .hits b{color:#a78bfa}
+
   /* ═══ notes ═══ */
   .note{
     position:absolute; top:0; left:0;
@@ -133,11 +207,7 @@
       0 12px 32px -16px rgba(0,0,0,.9),
       0 0 24px -12px var(--c),
       inset 0 1px 0 rgba(255,255,255,.05);
-    transition:
-      transform .4s cubic-bezier(.22,.9,.25,1),
-      box-shadow .22s,
-      border-color .22s,
-      padding .2s;
+    transition:transform .4s cubic-bezier(.22,.9,.25,1), box-shadow .22s, border-color .22s, opacity .3s;
     will-change:transform;
     animation:dropIn .42s cubic-bezier(.2,1.3,.4,1) both;
     user-select:none; -webkit-user-select:none;
@@ -145,6 +215,19 @@
   @keyframes dropIn{
     from{opacity:0; filter:blur(10px); transform:translate3d(var(--tx),calc(var(--ty) + 8px),0) scale(.9)}
     to  {opacity:1; filter:blur(0);    transform:translate3d(var(--tx),var(--ty),0) scale(1)}
+  }
+  .note.pinned{
+    border-color:color-mix(in srgb, var(--c) 70%, transparent);
+    box-shadow:
+      0 12px 32px -16px rgba(0,0,0,.9),
+      0 0 34px -8px var(--c),
+      inset 0 1px 0 rgba(255,255,255,.08);
+  }
+  .note.pinned::after{
+    content:""; position:absolute; top:-2px; left:14px; right:14px; height:2px;
+    border-radius:2px;
+    background:linear-gradient(90deg, transparent, var(--c), transparent);
+    box-shadow:0 0 12px var(--c);
   }
   .note:hover{
     box-shadow:
@@ -162,11 +245,9 @@
     z-index:5000;
   }
   .note.gone{animation:vanish .26s ease forwards}
-  @keyframes vanish{
-    to{opacity:0; filter:blur(10px); transform:translate3d(var(--tx),var(--ty),0) scale(.92)}
-  }
+  @keyframes vanish{to{opacity:0; filter:blur(10px); transform:translate3d(var(--tx),var(--ty),0) scale(.92)}}
+  .note.dim{opacity:.15; filter:grayscale(1) blur(2px); pointer-events:none}
 
-  /* head: only ~18px tall, always visible */
   .note-head{
     display:flex; align-items:center; gap:7px;
     height:18px; margin-bottom:6px;
@@ -183,8 +264,12 @@
     color:var(--c); opacity:.9;
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
+  .author .age{
+    font-size:9.5px; font-weight:600; color:#55556e;
+    letter-spacing:.04em; flex-shrink:0; margin-left:2px;
+  }
   .acts{display:flex; gap:1px; opacity:0; transition:opacity .15s; flex-shrink:0}
-  .note:hover .acts, .note.dragging .acts{opacity:1}
+  .note:hover .acts, .note.dragging .acts, .note.pinned .acts{opacity:1}
   .acts button{
     all:unset; width:18px; height:18px; display:grid; place-items:center;
     cursor:pointer; border-radius:5px; font-size:10px;
@@ -192,8 +277,9 @@
   }
   .acts button:hover{background:rgba(255,255,255,.1); color:#fff}
   .acts .a-del:hover{background:rgba(248,113,113,.2); color:#fca5a5}
+  .acts .a-pin:hover{background:rgba(167,139,250,.22); color:#c4b5fd}
+  .acts .a-pin.on{color:#a78bfa; opacity:1}
 
-  /* body: hugs content, no min-height wasted */
   .body{
     font-size:14.5px; line-height:1.5; color:#f4f4fa;
     white-space:pre-wrap; word-break:break-word;
@@ -201,25 +287,26 @@
     max-height:280px; overflow:auto;
     user-select:text; -webkit-user-select:text;
     scrollbar-width:thin; scrollbar-color:rgba(255,255,255,.15) transparent;
-    min-height:1.5em; /* one line for the placeholder */
+    min-height:1.5em;
   }
   .body::-webkit-scrollbar{width:4px}
   .body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15); border-radius:9px}
-  .body:empty::before{
-    content:"write…"; color:rgba(255,255,255,.2);
-    pointer-events:none;
+  .body:empty::before{content:"write…"; color:rgba(255,255,255,.2); pointer-events:none}
+  .body mark{
+    background:rgba(255,217,61,.35); color:#fff;
+    border-radius:3px; padding:0 2px;
+  }
+  .body .mention{
+    color:#a78bfa; font-weight:700;
+    background:rgba(139,92,246,.16); border-radius:4px; padding:0 4px;
   }
 
-  /* typing strip — sits INSIDE, tight, appears/disappears cleanly */
   .typing-strip{
-    display:none;
-    align-items:center; gap:7px;
-    margin-top:8px; padding:5px 9px;
-    border-radius:8px;
+    display:none; align-items:center; gap:7px;
+    margin-top:8px; padding:5px 9px; border-radius:8px;
     background:rgba(255,255,255,.035);
     border:1px solid rgba(255,255,255,.06);
-    font-size:11px; font-weight:500;
-    color:#a8a8c0;
+    font-size:11px; font-weight:500; color:#a8a8c0;
     animation:stripIn .22s ease both;
   }
   @keyframes stripIn{from{opacity:0; transform:translateY(-4px)}to{opacity:1; transform:translateY(0)}}
@@ -233,19 +320,13 @@
   }
   .typing-dots i:nth-child(2){animation-delay:.15s}
   .typing-dots i:nth-child(3){animation-delay:.3s}
-  @keyframes typebob{
-    0%,60%,100%{transform:translateY(0); opacity:.45}
-    30%        {transform:translateY(-3.5px); opacity:1}
-  }
+  @keyframes typebob{0%,60%,100%{transform:translateY(0); opacity:.45}30%{transform:translateY(-3.5px); opacity:1}}
 
-  /* reactions — compact, hover-only until they exist */
   .react-bar{
-    display:none;
-    flex-wrap:wrap; gap:4px;
+    display:none; flex-wrap:wrap; gap:4px;
     margin-top:9px; align-items:center;
   }
-  .react-bar.on,
-  .note:hover .react-bar{display:flex}
+  .react-bar.on, .note:hover .react-bar, .note.pinned .react-bar{display:flex}
   .react-chip{
     all:unset; cursor:pointer;
     display:inline-flex; align-items:center; gap:4px;
@@ -273,12 +354,9 @@
     border:1px dashed rgba(255,255,255,.14);
     transition:.15s;
   }
-  .react-add:hover{
-    color:#fff; background:rgba(255,255,255,.1);
-    border-color:var(--c); border-style:solid;
-  }
+  .react-add:hover{color:#fff; background:rgba(255,255,255,.1); border-color:var(--c); border-style:solid}
 
-  /* picker — bulletproof */
+  /* picker */
   .emoji-picker{
     position:fixed; z-index:9700;
     display:flex; flex-wrap:wrap; gap:2px; padding:6px;
@@ -315,16 +393,44 @@
     white-space:nowrap; letter-spacing:.03em;
   }
 
-  /* emoji float */
+  /* floating emojis */
   .emoji-fly{
-    position:fixed; font-size:24px; pointer-events:none; z-index:9600;
-    animation:floatUp 1.5s cubic-bezier(.2,.8,.3,1) forwards;
+    position:fixed; font-size:26px; pointer-events:none; z-index:9600;
+    animation:floatUp 1.7s cubic-bezier(.2,.8,.3,1) forwards;
   }
   @keyframes floatUp{
     0%  {transform:translate(-50%,-50%) scale(.3); opacity:0}
-    18% {transform:translate(-50%,-62%) scale(1.2); opacity:1}
-    100%{transform:translate(-50%,-260%) scale(.9); opacity:0}
+    18% {transform:translate(-50%,-62%) scale(1.25); opacity:1}
+    100%{transform:translate(-50%,-280%) scale(.9); opacity:0}
   }
+
+  /* confetti */
+  .confetti{
+    position:fixed; top:-14px; width:8px; height:12px;
+    border-radius:2px; pointer-events:none; z-index:9900;
+    animation:fall linear forwards;
+  }
+  @keyframes fall{
+    0%{transform:translateY(0) rotate(0deg); opacity:1}
+    100%{transform:translateY(110vh) rotate(720deg); opacity:.2}
+  }
+
+  /* toast */
+  #toasts{
+    position:fixed; left:50%; bottom:26px; transform:translateX(-50%);
+    z-index:9800; display:flex; flex-direction:column; gap:8px;
+    align-items:center; pointer-events:none;
+    padding-bottom:env(safe-area-inset-bottom);
+    max-width:92vw;
+  }
+  .toast{
+    font-size:13px; padding:10px 16px; border-radius:11px; color:#fff;
+    background:rgba(30,20,45,.95);
+    border:1px solid rgba(248,113,113,.35);
+    box-shadow:0 14px 40px -12px #000;
+    animation:popIn .25s ease both; text-align:center;
+  }
+  .toast.ok{border-color:rgba(139,92,246,.4)}
 
   /* empty state */
   #hint{
@@ -346,40 +452,27 @@
     border-radius:5px; padding:2px 7px; margin:0 2px; color:#c0c0d8;
   }
 
-  /* toasts */
-  #toasts{
-    position:fixed; left:50%; bottom:26px; transform:translateX(-50%);
-    z-index:9800; display:flex; flex-direction:column; gap:8px;
-    align-items:center; pointer-events:none;
-    padding-bottom:env(safe-area-inset-bottom);
-    max-width:92vw;
-  }
-  .toast{
-    font-size:13px; padding:10px 16px; border-radius:11px; color:#fff;
-    background:rgba(30,20,45,.95);
-    border:1px solid rgba(248,113,113,.35);
-    box-shadow:0 14px 40px -12px #000;
-    animation:popIn .25s ease both; text-align:center;
-  }
-
   /* ═══ mobile ═══ */
   @media (max-width: 640px){
-    #bar{height:calc(54px + env(safe-area-inset-top)); padding:0 12px; gap:10px}
-    .brand{font-size:10.5px; letter-spacing:.22em; gap:8px}
+    #bar{height:calc(58px + env(safe-area-inset-top)); padding:0 10px; gap:8px}
+    .brand{font-size:10px; letter-spacing:.2em; gap:7px}
     .brand .orb{width:9px; height:9px}
-    #meta{font-size:11px}
-    .right{gap:6px}
-    .status{display:none}
-    .btn{padding:7px 12px; font-size:12.5px; border-radius:9px}
+    .room-pill{padding:3px 8px; font-size:9.5px; max-width:90px}
+    .avatar{width:28px; height:28px; font-size:11px; margin-left:-9px; border-width:2px}
+    .avatar .dot{width:9px; height:9px; border-width:1.5px}
+    .online-label{font-size:0; gap:0}
+    .online-label i{margin-right:0}
+    .btn{padding:7px 11px; font-size:12px; border-radius:9px}
     .btn.icon{padding:7px 9px}
-    .avatar{width:24px; height:24px; font-size:9.5px}
+    #searchbar{top:calc(58px + env(safe-area-inset-top)); padding:8px 10px}
+    #searchbar input{font-size:15px; padding:8px 12px}
 
     .note{padding:11px 13px 11px}
     .note-head{height:20px; margin-bottom:5px}
     .body{font-size:15px}
     .acts{opacity:1}
     .acts button{width:22px; height:22px; font-size:12px}
-    .react-bar{display:flex} /* always visible on mobile */
+    .react-bar{display:flex}
     .react-chip{padding:3px 9px 4px; font-size:13px}
     .react-add{width:26px; height:26px; font-size:15px}
     .emoji-picker button{width:44px; height:44px; font-size:22px}
@@ -397,8 +490,8 @@
   <div id="hint">
     <h2>the wall is waiting</h2>
     <p>
-      <kbd>N</kbd> · or double-tap · or <strong>+ Note</strong><br>
-      drag the header to reorder
+      <kbd>N</kbd> new · <kbd>/</kbd> search · <kbd>double-tap</kbd> anywhere<br>
+      drag header to reorder · pin 📌 to keep on top
     </p>
   </div>
 </div>
@@ -407,29 +500,42 @@
 
 <header id="bar">
   <div class="brand"><span class="orb"></span> NEBULA</div>
-  <div id="meta">
-    <span id="metaCount">0 notes</span>
-    <span class="sep">·</span>
-    <span id="metaLive">connecting…</span>
+  <span class="room-pill" id="roomPill" title="Click to copy room link">main</span>
+
+  <div class="spacer"></div>
+
+  <div class="people">
+    <div class="avatars" id="avatars"></div>
+    <span class="online-label" id="onlineLabel"><i></i><span id="onlineText">1 online</span></span>
   </div>
-  <div class="right">
-    <div class="people" id="people"></div>
-    <span class="status" id="status"><i></i><span id="statusText">live</span></span>
-    <button class="btn primary" id="add">+ Note</button>
-    <button class="btn icon" id="mute" title="Sound">🔊</button>
-  </div>
+
+  <button class="btn icon" id="searchBtn" title="Search">🔍</button>
+  <button class="btn primary" id="add">+ Note</button>
+  <button class="btn icon" id="mute" title="Sound">🔊</button>
 </header>
+
+<div id="searchbar">
+  <input id="searchInput" placeholder="Search notes, authors, @mentions…" autocomplete="off" spellcheck="false" />
+  <span class="hits" id="searchHits"></span>
+  <button class="btn icon" id="searchClose" title="Close">✕</button>
+</div>
 
 <div id="toasts"></div>
 
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-/* ════════ config ════════ */
+/* ════ config ════ */
 const SUPABASE_URL = 'https://piexelytvvfsoeqhlokb.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_neiQC042cfc6Io2r8Cf6hw_WoecdytJ';
 
-/* ════════ helpers ════════ */
+/* ════ room from URL hash ════ */
+const ROOM = (() => {
+  const raw = decodeURIComponent(location.hash.slice(1) || 'main');
+  return (raw.replace(/[^a-z0-9-_]/gi, '-').toLowerCase().slice(0, 40)) || 'main';
+})();
+
+/* ════ helpers ════ */
 const $    = s => document.querySelector(s);
 const pick = a => a[Math.floor(Math.random() * a.length)];
 const uid  = () => crypto.randomUUID?.() ?? 'id-' + Math.random().toString(36).slice(2) + Date.now();
@@ -437,6 +543,7 @@ const hexA = (h, a) => {
   const n = parseInt(h.slice(1), 16);
   return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`;
 };
+const esc  = s => s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const isMobile = () => innerWidth < 640;
 
 const PALETTE = ['yellow','pink','cyan','green','violet','orange'];
@@ -448,8 +555,9 @@ const NAMES = ['Nova','Comet','Pulsar','Quasar','Orion','Vega','Lyra','Atlas',
                'Rigel','Sirius','Zenith','Cosmo','Astra','Nyx','Echo','Meteor',
                'Phoenix','Hydra','Indigo','Sol','Luna'];
 const REACTS = ['✨','🔥','💜','🚀','🎯','💡','😂','👍','❤️','🎉'];
+const MILESTONES = [10, 25, 50, 100, 250, 500];
 
-/* ════════ identity ════════ */
+/* ════ identity ════ */
 let me;
 try { me = JSON.parse(sessionStorage.getItem('nebula.me')); } catch {}
 if (!me) {
@@ -457,18 +565,20 @@ if (!me) {
   sessionStorage.setItem('nebula.me', JSON.stringify(me));
 }
 
-/* ════════ state ════════ */
+/* ════ state ════ */
 const wall    = $('#wall');
 const cursors = $('#cursors');
 const notes   = new Map();
 let sb, room, zTop = 10;
 let cursorTimer = null, cursorBuf = null;
 let soundOn = localStorage.getItem('nebula.mute') !== '1';
-const typingUsers = new Map();  // userId → { id, name, color, noteId, timer }
+const typingUsers = new Map();
 const cursorEls = new Map();
 let layoutRaf = null;
+let searchQuery = '';
+let celebratedMilestones = new Set();
 
-/* ════════ sound ════════ */
+/* ════ sound ════ */
 let actx;
 function blip(freq = 880, dur = 0.07, type = 'sine', gain = 0.04) {
   if (!soundOn) return;
@@ -484,10 +594,11 @@ function blip(freq = 880, dur = 0.07, type = 'sine', gain = 0.04) {
 }
 const chord = (f, d=0.14) => f.forEach((x,i) => setTimeout(() => blip(x, d), i*22));
 
-/* ════════ toast ════════ */
-function toast(msg) {
+/* ════ toast ════ */
+function toast(msg, ok = false) {
   const el = document.createElement('div');
-  el.className = 'toast'; el.textContent = msg;
+  el.className = 'toast' + (ok ? ' ok' : '');
+  el.textContent = msg;
   $('#toasts').appendChild(el);
   setTimeout(() => {
     el.style.transition = 'opacity .3s, transform .3s';
@@ -497,16 +608,23 @@ function toast(msg) {
   }, 4200);
 }
 
-/* ════════ status ════════ */
-function setStatus(state) {
-  const el = $('#status'), txt = $('#statusText');
-  el.classList.remove('live','dead');
-  if (state === 'SUBSCRIBED') { el.classList.add('live'); txt.textContent = 'live'; }
-  else if (state === 'CHANNEL_ERROR' || state === 'TIMED_OUT') { el.classList.add('dead'); txt.textContent='offline'; }
-  else { txt.textContent = 'connecting'; }
+/* ════ relative time ════ */
+function relTime(ts) {
+  if (!ts) return '';
+  const s = Math.floor((Date.now() - new Date(ts).getTime()) / 1000);
+  if (s < 30)   return 'now';
+  if (s < 60)   return s + 's';
+  const m = Math.floor(s / 60);
+  if (m < 60)   return m + 'm';
+  const h = Math.floor(m / 60);
+  if (h < 24)   return h + 'h';
+  return Math.floor(h / 24) + 'd';
 }
 
-/* ════════ layout ════════ */
+/* ════ status ════ */
+function setStatus() {} // merged into presence
+
+/* ════ layout ════ */
 function computeCols() {
   const gap = 16, side = 16;
   const availW = innerWidth - side * 2;
@@ -520,17 +638,30 @@ function computeCols() {
   }
   const totalW = cols * colW + (cols - 1) * gap;
   const startX = Math.max(side, (innerWidth - totalW) / 2);
-  const topY = ($('#bar').offsetHeight || 60) + 20;
+  const topY = ($('#bar').offsetHeight || 64) + ($('#searchbar').classList.contains('show') ? 56 : 20);
   return { gap, cols, colW, startX, topY };
+}
+
+function sortedNotes() {
+  return [...notes.values()].sort((a, b) => {
+    if (a.data.pinned !== b.data.pinned) return a.data.pinned ? -1 : 1;
+    return (a.data.sort_order ?? 0) - (b.data.sort_order ?? 0);
+  });
+}
+
+function matchesSearch(entry) {
+  if (!searchQuery) return true;
+  const q = searchQuery.toLowerCase();
+  const text = (entry.data.text || '').toLowerCase();
+  const author = (entry.data.author || '').toLowerCase();
+  return text.includes(q) || author.includes(q);
 }
 
 function layoutNow(opts = {}) {
   const { floatingId = null, insertIndex = -1 } = opts;
   const L = computeCols();
 
-  const sorted = [...notes.values()]
-    .filter(e => e.data.id !== floatingId)
-    .sort((a, b) => (a.data.sort_order ?? 0) - (b.data.sort_order ?? 0));
+  const sorted = sortedNotes().filter(e => e.data.id !== floatingId);
 
   let items = sorted;
   if (floatingId && insertIndex >= 0) {
@@ -566,21 +697,15 @@ function layoutNow(opts = {}) {
   }
 
   wall.style.minHeight = Math.max(innerHeight, maxBottom + 80) + 'px';
-  updateMeta();
 }
 
 function layoutAll(opts = {}) {
   if (layoutRaf) cancelAnimationFrame(layoutRaf);
-  layoutRaf = requestAnimationFrame(() => {
-    layoutRaf = null;
-    layoutNow(opts);
-  });
+  layoutRaf = requestAnimationFrame(() => { layoutRaf = null; layoutNow(opts); });
 }
 
 function computeInsertIndex(clientY, floatingId) {
-  const sorted = [...notes.values()]
-    .filter(e => e.data.id !== floatingId)
-    .sort((a, b) => (a.data.sort_order ?? 0) - (b.data.sort_order ?? 0));
+  const sorted = sortedNotes().filter(e => e.data.id !== floatingId);
   for (let i = 0; i < sorted.length; i++) {
     const rect = sorted[i].el.getBoundingClientRect();
     if (clientY < rect.top + rect.height / 2) return i;
@@ -588,11 +713,26 @@ function computeInsertIndex(clientY, floatingId) {
   return sorted.length;
 }
 
-/* ════════ note render ════════ */
+/* ════ note render ════ */
 function setPos(el, x, y, rot = 0) {
   el.style.setProperty('--tx', x + 'px');
   el.style.setProperty('--ty', y + 'px');
   el.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${rot}deg)`;
+}
+
+function renderBody(entry) {
+  const body = entry.el.querySelector('.body');
+  const text = entry.data.text || '';
+  if (document.activeElement === body) return; // don't nuke caret
+  if (body.innerText === text && !searchQuery && !/@\w+/.test(text)) return;
+
+  let html = esc(text);
+  html = html.replace(/@([a-z0-9_-]+)/gi, '<span class="mention">@$1</span>');
+  if (searchQuery) {
+    const re = new RegExp('(' + searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+    html = html.replace(re, '<mark>$1</mark>');
+  }
+  body.innerHTML = html || '';
 }
 
 function renderNote(entry) {
@@ -601,12 +741,14 @@ function renderNote(entry) {
   el.style.setProperty('--c', hex);
   el.style.setProperty('--c-soft', hexA(hex, .12));
   el.style.setProperty('--c-line', hexA(hex, .38));
+  el.classList.toggle('pinned', !!data.pinned);
 
-  const body = el.querySelector('.body');
-  const text = data.text || '';
-  if (document.activeElement !== body && body.innerText !== text) body.innerText = text;
-
+  renderBody(entry);
   el.querySelector('.who').textContent = data.author || '?';
+  el.querySelector('.age').textContent = relTime(data.updated_at || data.created_at);
+  el.querySelector('.a-pin').classList.toggle('on', !!data.pinned);
+
+  el.classList.toggle('dim', !matchesSearch(entry));
 
   renderReactions(entry);
   renderTypingStrip(entry);
@@ -618,8 +760,13 @@ function createNoteEl(data) {
   el.dataset.id = data.id;
   el.innerHTML = `
     <header class="note-head">
-      <div class="author"><span class="dot"></span><span class="who"></span></div>
+      <div class="author">
+        <span class="dot"></span>
+        <span class="who"></span>
+        <span class="age"></span>
+      </div>
       <div class="acts">
+        <button class="a-pin"   title="Pin">📌</button>
         <button class="a-color" title="Recolour">◐</button>
         <button class="a-del"   title="Delete">✕</button>
       </div>
@@ -646,20 +793,16 @@ function upsertNote(row) {
     Object.assign(entry.data, row);
   }
   renderNote(entry);
-  if (isNew) {
-    entry.el.style.animation = 'dropIn .42s cubic-bezier(.2,1.3,.4,1) both';
-  }
+  if (isNew) entry.el.style.animation = 'dropIn .42s cubic-bezier(.2,1.3,.4,1) both';
   layoutAll();
+  checkMilestone();
 }
 
 function dropNote(id) {
   const entry = notes.get(id);
   if (!entry) return;
   notes.delete(id);
-  // clear typing for that note
-  typingUsers.forEach((v, k) => {
-    if (v.noteId === id) { clearTimeout(v.timer); typingUsers.delete(k); }
-  });
+  typingUsers.forEach((v, k) => { if (v.noteId === id) { clearTimeout(v.timer); typingUsers.delete(k); } });
   const el = entry.el;
   const rect = el.getBoundingClientRect();
   el.style.setProperty('--tx', rect.left + 'px');
@@ -672,31 +815,53 @@ function dropNote(id) {
 }
 
 const updateEmpty = () => $('#hint').classList.toggle('hide', notes.size > 0);
-const bringFront  = entry => entry.el.style.zIndex = ++zTop;
 
-function updateMeta() {
+/* ════ milestone confetti ════ */
+function checkMilestone() {
   const n = notes.size;
-  $('#metaCount').textContent = n === 0 ? 'empty' : n + (n === 1 ? ' note' : ' notes');
+  for (const m of MILESTONES) {
+    if (n >= m && !celebratedMilestones.has(m)) {
+      celebratedMilestones.add(m);
+      if (m === n) {
+        confetti();
+        toast(`🎉 ${m} notes on the wall!`, true);
+        chord([880, 1100, 1320, 1760], 0.16);
+      }
+    }
+  }
+}
+function confetti() {
+  const colors = ['#8b5cf6','#2dd4bf','#ec4899','#fbbf24','#22d3ee','#a78bfa'];
+  for (let i = 0; i < 70; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti';
+    p.style.left = (Math.random() * 100) + 'vw';
+    p.style.background = colors[i % colors.length];
+    p.style.animationDelay = (Math.random() * 0.5) + 's';
+    p.style.animationDuration = (1.6 + Math.random() * 1.2) + 's';
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 3200);
+  }
 }
 
-/* ════════ reactions ════════ */
+/* ════ reactions ════ */
 function renderReactions(entry) {
   const bar = entry.el.querySelector('.react-bar');
   const openFor = document.querySelector(`.emoji-picker[data-note-id="${entry.data.id}"]`);
-  if (openFor) return; // don't rebuild under an open picker
+  if (openFor) return;
 
   const r = entry.data.reactions || {};
   const hasAny = Object.values(r).some(a => Array.isArray(a) && a.length);
   bar.classList.toggle('on', hasAny);
-
   bar.innerHTML = '';
+
   Object.entries(r).forEach(([emoji, users]) => {
     if (!Array.isArray(users) || !users.length) return;
     const mine = users.includes(me.id);
     const btn = document.createElement('button');
     btn.className = 'react-chip' + (mine ? ' mine' : '');
     btn.innerHTML = `<span>${emoji}</span><b>${users.length}</b>`;
-    btn.onclick = e => { e.stopPropagation(); toggleReaction(entry.data.id, emoji); };
+    btn.onclick = e => { e.stopPropagation(); toggleReaction(entry.data.id, emoji, false); };
     bar.appendChild(btn);
   });
 
@@ -709,7 +874,7 @@ function renderReactions(entry) {
   bar.appendChild(add);
 }
 
-async function toggleReaction(noteId, emoji) {
+async function toggleReaction(noteId, emoji, broadcast = true) {
   const entry = notes.get(noteId);
   if (!entry) return;
 
@@ -729,13 +894,28 @@ async function toggleReaction(noteId, emoji) {
 
   const { error } = await sb.from('notes').update({ reactions }).eq('id', noteId);
   if (error) {
-    toast(/reactions/i.test(error.message)
-      ? 'Run the SQL — missing `reactions` column.'
-      : error.message);
+    toast(/reactions/i.test(error.message) ? 'Run the SQL — missing `reactions` column.' : error.message);
+    return;
+  }
+
+  // ─── live reaction sync: everyone sees the emoji fly ───
+  if (added && broadcast && room) {
+    const rect = entry.el.getBoundingClientRect();
+    room.send({
+      type: 'broadcast', event: 'reaction',
+      payload: {
+        noteId,
+        emoji,
+        x: rect.left + rect.width / 2,
+        y: rect.top + rect.height / 2,
+        by: me.name,
+        color: me.color
+      }
+    });
   }
 }
 
-/* ════════ picker ════════ */
+/* ════ picker ════ */
 function openPicker(entry, anchor) {
   const existing = document.querySelector(`.emoji-picker[data-note-id="${entry.data.id}"]`);
   if (existing) { closePicker(); return; }
@@ -750,7 +930,6 @@ function openPicker(entry, anchor) {
     const b = document.createElement('button');
     b.type = 'button';
     b.textContent = em;
-    // fire on pointerdown for instant, race-free response
     b.addEventListener('pointerdown', ev => {
       ev.stopPropagation();
       ev.preventDefault();
@@ -768,23 +947,22 @@ function openPicker(entry, anchor) {
   const ph = picker.offsetHeight || 44;
   let left = r.left + r.width / 2 - pw / 2;
   let top  = r.top - ph - 8;
-  left = Math.max(8, Math.min(innerWidth  - pw - 8, left));
-  if (top < ($('#bar').offsetHeight || 60) + 6) top = r.bottom + 8;
+  left = Math.max(8, Math.min(innerWidth - pw - 8, left));
+  if (top < ($('#bar').offsetHeight || 64) + 6) top = r.bottom + 8;
   if (top + ph > innerHeight - 8) top = innerHeight - ph - 8;
   picker.style.left = left + 'px';
-  picker.style.top  = top  + 'px';
+  picker.style.top  = top + 'px';
 
   setTimeout(() => {
     const closeOnOutside = e => {
       if (e.target.closest('.emoji-picker')) return;
-      if (e.target.closest('.react-add'))     return;
+      if (e.target.closest('.react-add')) return;
       closePicker();
     };
     document.addEventListener('pointerdown', closeOnOutside);
     picker._closeHandler = closeOnOutside;
   }, 0);
 }
-
 function closePicker() {
   document.querySelectorAll('.emoji-picker').forEach(p => {
     if (p._closeHandler) document.removeEventListener('pointerdown', p._closeHandler);
@@ -792,29 +970,26 @@ function closePicker() {
   });
 }
 
-/* ════════ bursts ════════ */
+/* ════ bursts ════ */
 function burst(entry, emoji) {
   const rect = entry.el.getBoundingClientRect();
-  const cx = rect.left + rect.width / 2;
-  const cy = rect.top + rect.height / 2;
-
+  spawnEmoji(rect.left + rect.width / 2, rect.top + rect.height / 2, emoji);
+}
+function spawnEmoji(x, y, emoji) {
   const fly = document.createElement('div');
   fly.className = 'emoji-fly';
   fly.textContent = emoji;
-  fly.style.left = cx + 'px';
-  fly.style.top  = cy + 'px';
+  fly.style.left = x + 'px';
+  fly.style.top  = y + 'px';
   document.body.appendChild(fly);
-  setTimeout(() => fly.remove(), 1600);
+  setTimeout(() => fly.remove(), 1700);
 }
 
-/* ════════ typing — robust ════════ */
+/* ════ typing ════ */
 function renderTypingStrip(entry) {
   const strip = entry.el.querySelector('.typing-strip');
   if (!strip) return;
-
-  const users = [...typingUsers.values()]
-    .filter(u => u.noteId === entry.data.id && u.id !== me.id);
-
+  const users = [...typingUsers.values()].filter(u => u.noteId === entry.data.id && u.id !== me.id);
   if (!users.length) {
     if (strip.classList.contains('on')) {
       strip.classList.remove('on');
@@ -823,14 +998,12 @@ function renderTypingStrip(entry) {
     }
     return;
   }
-
   const color = users[0].color;
   const names = users.slice(0, 2).map(u => `<b style="color:${u.color}">${u.name}</b>`);
-  const more  = users.length > 2 ? ` +${users.length - 2}` : '';
+  const more = users.length > 2 ? ` +${users.length - 2}` : '';
   const label = users.length === 1
     ? `${names[0]} is typing`
     : `${names.join(' & ')}${more} are typing`;
-
   strip.classList.add('on');
   strip.innerHTML = `
     <span class="typing-dots">
@@ -838,57 +1011,42 @@ function renderTypingStrip(entry) {
       <i style="background:${color};box-shadow:0 0 6px ${color}"></i>
       <i style="background:${color};box-shadow:0 0 6px ${color}"></i>
     </span>
-    <span class="who">${label}</span>
-  `;
+    <span class="who">${label}</span>`;
   requestAnimationFrame(() => layoutAll());
 }
-
 function markTyping(p) {
-  // p = { id, name, color, noteId }
   const prev = typingUsers.get(p.id);
   if (prev?.timer) clearTimeout(prev.timer);
-
   const timer = setTimeout(() => {
     typingUsers.delete(p.id);
-    renderAllTyping();
+    notes.forEach(renderTypingStrip);
   }, 2400);
-
   typingUsers.set(p.id, { ...p, timer });
-  renderAllTyping();
+  notes.forEach(renderTypingStrip);
 }
 
-function renderAllTyping() {
-  notes.forEach(e => renderTypingStrip(e));
-}
-
-/* ════════ wire note ════════ */
+/* ════ wire note ════ */
 function wireNote(entry) {
   const { el, data } = entry;
   const head = el.querySelector('.note-head');
   const body = el.querySelector('.body');
 
-  el.addEventListener('pointerdown', () => bringFront(entry), true);
+  el.addEventListener('pointerdown', () => { el.style.zIndex = ++zTop; }, true);
 
-  /* ── drag to reorder ── */
+  /* drag to reorder */
   head.addEventListener('pointerdown', e => {
     if (e.target.closest('button')) return;
     if (document.activeElement !== body) e.preventDefault();
-    bringFront(entry);
-
     try { head.setPointerCapture(e.pointerId); } catch {}
 
     const startX = e.clientX, startY = e.clientY;
     const origX = entry._layoutX ?? 0, origY = entry._layoutY ?? 0;
-
-    const currentSorted = [...notes.values()]
-      .sort((a,b) => (a.data.sort_order ?? 0) - (b.data.sort_order ?? 0));
-    let currentIndex = currentSorted.findIndex(x => x.data.id === data.id);
+    const sortedBefore = sortedNotes();
+    let currentIndex = sortedBefore.findIndex(x => x.data.id === data.id);
 
     el.classList.add('dragging');
     el.style.transition = 'none';
-
     layoutNow({ floatingId: data.id, insertIndex: currentIndex });
-
     let lastX = startX;
 
     const onMove = ev => {
@@ -896,7 +1054,6 @@ function wireNote(entry) {
       const vx = ev.clientX - lastX; lastX = ev.clientX;
       const rot = Math.max(-3.5, Math.min(3.5, vx * 0.28));
       setPos(el, origX + dx, origY + dy, rot);
-
       const idx = computeInsertIndex(ev.clientY, data.id);
       if (idx !== currentIndex) {
         currentIndex = idx;
@@ -912,9 +1069,8 @@ function wireNote(entry) {
       el.style.transition = '';
       setPos(el, origX, origY, 0);
 
-      const others = [...notes.values()]
-        .filter(x => x.data.id !== data.id)
-        .sort((a,b) => (a.data.sort_order ?? 0) - (b.data.sort_order ?? 0));
+      const others = sortedNotes().filter(x => x.data.id !== data.id && !x.data.pinned);
+      if (data.pinned) { layoutAll(); return; }
 
       let newOrder;
       if (currentIndex >= others.length) {
@@ -928,10 +1084,8 @@ function wireNote(entry) {
         const b = others[currentIndex].data.sort_order ?? 0;
         newOrder = (a + b) / 2;
       }
-
       data.sort_order = newOrder;
       layoutAll();
-
       const { error } = await sb.from('notes').update({ sort_order: newOrder }).eq('id', data.id);
       if (error) toast(error.message);
     };
@@ -941,9 +1095,9 @@ function wireNote(entry) {
     head.addEventListener('pointercancel', onUp);
   });
 
-  /* ── editing ── */
+  /* edit */
   body.addEventListener('keydown', e => { if (e.key === 'Escape') body.blur(); });
-  body.addEventListener('focus', () => bringFront(entry));
+  body.addEventListener('focus', () => { el.style.zIndex = ++zTop; });
 
   let lastPing = 0;
   body.addEventListener('input', () => {
@@ -951,31 +1105,42 @@ function wireNote(entry) {
     const now = Date.now();
     if (now - lastPing < 400) return;
     lastPing = now;
-    if (!room) return;
-    room.send({
-      type: 'broadcast',
-      event: 'note-typing',
-      payload: {
-        id: me.id,
-        name: me.name,
-        color: me.color,
-        noteId: data.id
-      }
+    room?.send({
+      type: 'broadcast', event: 'note-typing',
+      payload: { id: me.id, name: me.name, color: me.color, noteId: data.id }
     });
   });
 
   body.addEventListener('blur', async () => {
-    const text = body.innerText.replace(/\n{3,}/g, '\n\n').trim();
+    const raw = body.innerText.replace(/\n{3,}/g, '\n\n');
+    const text = raw.trim();
     if (!text) return removeNote(data.id);
-    if (text === (data.text || '')) { body.innerText = text; return; }
+    if (text === (data.text || '')) { renderBody(entry); return; }
     data.text = text;
-    body.innerText = text;
+    renderBody(entry);
     layoutAll();
     const { error } = await sb.from('notes').update({ text }).eq('id', data.id);
     if (error) toast(error.message);
   });
 
-  /* ── colour ── */
+  /* pin */
+  el.querySelector('.a-pin').onclick = async e => {
+    e.stopPropagation();
+    data.pinned = !data.pinned;
+    renderNote(entry);
+    layoutAll();
+    blip(data.pinned ? 990 : 550, 0.06, 'triangle', 0.04);
+    if (data.pinned) toast('📌 Pinned to top', true);
+    const { error } = await sb.from('notes').update({ pinned: data.pinned }).eq('id', data.id);
+    if (error) {
+      data.pinned = !data.pinned;
+      renderNote(entry);
+      layoutAll();
+      toast(error.message);
+    }
+  };
+
+  /* colour */
   el.querySelector('.a-color').onclick = async e => {
     e.stopPropagation();
     const i = PALETTE.indexOf(data.color);
@@ -987,7 +1152,7 @@ function wireNote(entry) {
     if (error) toast(error.message);
   };
 
-  /* ── delete ── */
+  /* delete */
   el.querySelector('.a-del').onclick = e => { e.stopPropagation(); removeNote(data.id); };
 }
 
@@ -998,35 +1163,30 @@ async function removeNote(id) {
   if (error) toast(error.message);
 }
 
-/* ════════ create ════════ */
+/* ════ create ════ */
 async function addNote() {
   const color = pick(PALETTE);
   const now = Date.now() / 1000;
   const { data, error } = await sb.from('notes')
-    .insert({ text:'', color, author: me.name, sort_order: now, x: 0, y: 0 })
+    .insert({ text:'', color, author: me.name, sort_order: now, room: ROOM, x: 0, y: 0 })
     .select().single();
   if (error) return toast(error.message);
   chord([660, 880, 1100], 0.08);
   upsertNote(data);
-  bringFront(notes.get(data.id));
-  setTimeout(() => {
-    const body = notes.get(data.id)?.el.querySelector('.body');
-    if (body) body.focus();
-  }, 140);
+  setTimeout(() => notes.get(data.id)?.el.querySelector('.body').focus(), 140);
 }
 
 $('#add').onclick = () => addNote();
 
 document.addEventListener('dblclick', e => {
-  if (e.target.closest('.note, .emoji-picker, #bar')) return;
+  if (e.target.closest('.note, .emoji-picker, #bar, #searchbar')) return;
   addNote();
 });
 
-/* mobile double-tap */
 let lastTap = 0, lastTapX = 0, lastTapY = 0;
 document.addEventListener('touchend', e => {
   if (!isMobile()) return;
-  if (e.target.closest('.note, .emoji-picker, #bar, button')) return;
+  if (e.target.closest('.note, .emoji-picker, #bar, #searchbar, button')) return;
   const t = e.changedTouches[0]; if (!t) return;
   const now = Date.now();
   if (now - lastTap < 320 && Math.hypot(t.clientX - lastTapX, t.clientY - lastTapY) < 40) {
@@ -1034,13 +1194,45 @@ document.addEventListener('touchend', e => {
   } else { lastTap = now; lastTapX = t.clientX; lastTapY = t.clientY; }
 }, { passive: true });
 
-addEventListener('keydown', e => {
-  if (e.target.closest('input, textarea, [contenteditable="true"]')) return;
-  if (e.key === 'n' || e.key === 'N') { e.preventDefault(); addNote(); }
-  if (e.key === 'Escape') closePicker();
+/* ════ search ════ */
+const searchBar = $('#searchbar');
+const searchInput = $('#searchInput');
+function openSearch() {
+  searchBar.classList.add('show');
+  searchInput.focus();
+  searchInput.select();
+  layoutAll();
+}
+function closeSearch() {
+  searchBar.classList.remove('show');
+  searchInput.value = '';
+  searchQuery = '';
+  $('#searchHits').textContent = '';
+  notes.forEach(renderNote);
+  layoutAll();
+}
+$('#searchBtn').onclick = () => searchBar.classList.contains('show') ? closeSearch() : openSearch();
+$('#searchClose').onclick = closeSearch;
+searchInput.addEventListener('input', () => {
+  searchQuery = searchInput.value.trim();
+  notes.forEach(renderNote);
+  layoutAll();
+  const hit = [...notes.values()].filter(matchesSearch).length;
+  $('#searchHits').innerHTML = searchQuery
+    ? `<b>${hit}</b>/${notes.size}`
+    : '';
 });
 
-/* mute */
+/* ════ keyboard ════ */
+addEventListener('keydown', e => {
+  const typing = e.target.closest('input, textarea, [contenteditable="true"]');
+  if (e.key === '/' && !typing) { e.preventDefault(); openSearch(); return; }
+  if (e.key === 'Escape') { closePicker(); if (searchBar.classList.contains('show')) closeSearch(); }
+  if (typing) return;
+  if (e.key === 'n' || e.key === 'N') { e.preventDefault(); addNote(); }
+});
+
+/* ════ mute ════ */
 const muteBtn = $('#mute');
 const paintMute = () => muteBtn.textContent = soundOn ? '🔊' : '🔇';
 muteBtn.onclick = () => {
@@ -1051,7 +1243,17 @@ muteBtn.onclick = () => {
 };
 paintMute();
 
-/* ════════ cursor broadcast ════════ */
+/* ════ room pill ════ */
+$('#roomPill').textContent = ROOM;
+$('#roomPill').onclick = () => {
+  const url = location.origin + location.pathname + '#' + ROOM;
+  navigator.clipboard?.writeText(url).then(
+    () => toast('Room link copied · share to invite', true),
+    () => toast('Copy failed — ' + url, false)
+  );
+};
+
+/* ════ cursor broadcast ════ */
 addEventListener('pointermove', e => {
   if (!room) return;
   cursorBuf = { id: me.id, name: me.name, color: me.color, x: e.clientX, y: e.clientY };
@@ -1062,7 +1264,7 @@ addEventListener('pointermove', e => {
   }, 55);
 }, { passive: true });
 
-/* ════════ draw cursor ════════ */
+/* ════ draw cursor ════ */
 function drawCursor(p) {
   if (p.id === me.id) return;
   let el = cursorEls.get(p.id);
@@ -1087,72 +1289,108 @@ function drawCursor(p) {
   el._kill = setTimeout(() => { el.remove(); cursorEls.delete(p.id); }, 7000);
 }
 
-/* ════════ presence ════════ */
+/* ════ presence — clean, big, v1-style ════ */
+let lastUsers = 0;
 function renderPeople() {
   if (!room) return;
-  const users = Object.values(room.presenceState()).flat();
-  const box = $('#people');
+  const raw = Object.values(room.presenceState()).flat();
+  // dedupe by id
+  const seen = new Set();
+  const users = [];
+  for (const u of raw) {
+    const key = u.id || u.name;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    users.push(u);
+  }
+
+  const box = $('#avatars');
   box.innerHTML = '';
-  const max = isMobile() ? 3 : 5;
+  const max = isMobile() ? 4 : 7;
 
   users.slice(0, max).forEach(u => {
     const d = document.createElement('div');
     d.className = 'avatar';
     d.style.background = u.color || '#888';
     d.textContent = (u.name || '?')[0].toUpperCase();
-    d.title = u.name || '';
+    d.innerHTML += `<span class="dot"></span><span class="tag" style="background:${u.color || '#888'};color:#08080f">${u.name || '?'}${u.id === me.id ? ' (you)' : ''}</span>`;
     box.appendChild(d);
   });
   if (users.length > max) {
     const d = document.createElement('div');
     d.className = 'avatar more';
     d.textContent = '+' + (users.length - max);
+    d.title = users.slice(max).map(u => u.name).join(', ');
     box.appendChild(d);
   }
-  $('#metaLive').innerHTML = users.length === 1
-    ? `you are <b>${me.name}</b>`
-    : `<b>${users.length}</b> people here`;
+
+  const n = users.length;
+  $('#onlineText').textContent = n === 1 ? '1 online' : `${n} online`;
+
+  // join announcement
+  if (n > lastUsers && lastUsers > 0) {
+    const newest = users.find(u => u.id !== me.id && !(lastUsers === 1 && u.id === me.id));
+    if (newest && newest.id !== me.id) blip(1200, 0.06, 'triangle', 0.03);
+  }
+  lastUsers = n;
 }
 
-/* ════════ boot ════════ */
+/* ════ boot ════ */
 async function boot() {
   const url = SUPABASE_URL.replace(/\/+$/,'').replace(/\/rest\/v1$/,'');
   sb = createClient(url, SUPABASE_KEY, { realtime: { params: { eventsPerSecond: 25 } } });
 
-  const probe = await sb.from('notes').select('id,reactions,sort_order').limit(1);
+  const probe = await sb.from('notes').select('id,reactions,sort_order,pinned,room').limit(1);
   if (probe.error) {
-    if (/reactions/i.test(probe.error.message)) toast('Missing `reactions` column — run the SQL.');
-    if (/sort_order/i.test(probe.error.message)) toast('Missing `sort_order` column — run the SQL.');
+    const m = probe.error.message;
+    if (/reactions/i.test(m))  toast('Missing `reactions` column — run the SQL.');
+    else if (/sort_order/i.test(m)) toast('Missing `sort_order` column — run the SQL.');
+    else if (/pinned/i.test(m))     toast('Missing `pinned` column — run the SQL.');
+    else if (/room/i.test(m))       toast('Missing `room` column — run the SQL.');
   }
 
-  const { data, error } = await sb.from('notes').select('*').order('sort_order', { ascending:true });
+  const { data, error } = await sb.from('notes')
+    .select('*')
+    .eq('room', ROOM)
+    .order('sort_order', { ascending: true });
   if (error) { toast('DB error: ' + error.message); console.error(error); return; }
   data.forEach(upsertNote);
   updateEmpty();
   layoutAll();
 
-  /* ── postgres realtime ── */
-  sb.channel('nebula-db')
-    .on('postgres_changes', { event:'*', schema:'public', table:'notes' }, payload => {
-      if (payload.eventType === 'DELETE') dropNote(payload.old.id);
-      else upsertNote(payload.new);
-    })
+  /* postgres realtime — filter by room */
+  sb.channel('nebula-db-' + ROOM)
+    .on('postgres_changes',
+      { event:'*', schema:'public', table:'notes', filter: `room=eq.${ROOM}` },
+      payload => {
+        if (payload.eventType === 'DELETE') dropNote(payload.old.id);
+        else upsertNote(payload.new);
+      })
     .subscribe();
 
-  /* ── presence + broadcast ── */
-  room = sb.channel('nebula-room', { config: { presence: { key: me.id } } });
+  /* presence + broadcast */
+  room = sb.channel('nebula-room-' + ROOM, { config: { presence: { key: me.id } } });
   room
-    .on('presence', { sync: () => renderPeople() })
+    .on('presence', { sync: renderPeople })
     .on('broadcast', { event:'cursor' }, ({ payload }) => drawCursor(payload))
     .on('broadcast', { event:'note-typing' }, ({ payload }) => {
-      // ignore own typing echoes
       if (payload.id === me.id) return;
-      // only accept if we have that note locally
       if (!notes.has(payload.noteId)) return;
       markTyping(payload);
     })
+    .on('broadcast', { event:'reaction' }, ({ payload }) => {
+      if (!payload) return;
+      // re-layout might have moved the note — use current rect
+      const entry = notes.get(payload.noteId);
+      if (entry) {
+        const rect = entry.el.getBoundingClientRect();
+        spawnEmoji(rect.left + rect.width / 2, rect.top + rect.height / 2, payload.emoji);
+      } else {
+        spawnEmoji(payload.x, payload.y, payload.emoji);
+      }
+      blip(760, 0.05, 'triangle', 0.03);
+    })
     .subscribe(async status => {
-      setStatus(status);
       if (status === 'SUBSCRIBED') {
         await room.track({ id: me.id, name: me.name, color: me.color });
         renderPeople();
@@ -1161,7 +1399,7 @@ async function boot() {
 
   addEventListener('beforeunload', () => room?.untrack());
 
-  /* ── resize ── */
+  /* resize */
   let rzT;
   addEventListener('resize', () => {
     closePicker();
@@ -1170,6 +1408,14 @@ async function boot() {
   });
 
   document.addEventListener('scroll', closePicker, true);
+
+  /* relative time refresh */
+  setInterval(() => {
+    notes.forEach(entry => {
+      const age = entry.el.querySelector('.age');
+      if (age) age.textContent = relTime(entry.data.updated_at || entry.data.created_at);
+    });
+  }, 30000);
 }
 
 boot();
