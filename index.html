@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>NEBULA — a collaborative wall</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; overflow:hidden; color:#e9e9f2;
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Inter,Roboto,sans-serif;
+    background:#07070d; -webkit-font-smoothing:antialiased;
+  }
+  button{font-family:inherit}
+
+  #canvas{
+    position:fixed; inset:0; overflow:hidden;
+    background:
+      radial-gradient(1100px 780px at 12% -5%, rgba(124,88,255,.18), transparent 62%),
+      radial-gradient(900px 700px at 92% 105%, rgba(0,208,255,.13), transparent 62%),
+      radial-gradient(700px 500px at 50% 50%, rgba(255,90,180,.06), transparent 70%),
+      #07070d;
+  }
+  #canvas::before{
+    content:""; position:absolute; inset:-2px; pointer-events:none;
+    background-image:
+      linear-gradient(rgba(255,255,255,.038) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.038) 1px, transparent 1px);
+    background-size:44px 44px;
+    -webkit-mask-image:radial-gradient(circle at 50% 42%, #000 38%, transparent 88%);
+    mask-image:radial-gradient(circle at 50% 42%, #000 38%, transparent 88%);
+  }
+
+  #bar{
+    position:fixed; top:0; left:0; right:0; height:62px; z-index:9000;
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:0 16px; pointer-events:none;
+    background:linear-gradient(180deg, rgba(7,7,13,.92), rgba(7,7,13,.4) 65%, transparent);
+    -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+  }
+  #bar > *{pointer-events:auto}
+  .brand{display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.22em; font-size:13px}
+  .orb{
+    width:12px; height:12px; border-radius:50%;
+    background:radial-gradient(circle at 32% 30%, #fff, #8b5cff 45%, #4dd4ff);
+    box-shadow:0 0 14px #8b5cff, 0 0 30px rgba(139,92,255,.55);
+    animation:pulse 2.6s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.22);opacity:.75}}
+  .right{display:flex; align-items:center; gap:10px}
+
+  .people{display:flex; align-items:center}
+  .avatar{
+    width:28px; height:28px; border-radius:50%; margin-left:-9px;
+    display:grid; place-items:center; font-size:11px; font-weight:800;
+    border:2px solid #0b0b14; box-shadow:0 0 12px -2px currentColor;
+    animation:pop .3s cubic-bezier(.2,1.5,.4,1); color:#07070d;
+  }
+  .avatar:first-child{margin-left:0}
+  .avatar.more{background:#23233a !important; color:#c9c9e0 !important}
+  @keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
+
+  .status{
+    display:flex; align-items:center; gap:7px; font-size:11px; font-weight:600;
+    color:#8b8ba7; letter-spacing:.06em; text-transform:uppercase;
+    padding:6px 11px; border-radius:99px;
+    background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.08);
+  }
+  .status i{width:7px; height:7px; border-radius:50%; background:#666; transition:.3s}
+  .status.live i{background:#3ce88a; box-shadow:0 0 10px #3ce88a}
+  .status.dead i{background:#ff5c7a; box-shadow:0 0 10px #ff5c7a}
+
+  .btn{
+    all:unset; cursor:pointer; font-size:13px; font-weight:600; color:#e9e9f2;
+    padding:9px 14px; border-radius:11px; text-align:center;
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1);
+    transition:.16s; white-space:nowrap;
+  }
+  .btn:hover{background:rgba(255,255,255,.12); transform:translateY(-1px)}
+  .btn:active{transform:translateY(0) scale(.97)}
+  .btn.primary{
+    background:linear-gradient(140deg,#8b5cff,#4dd4ff); color:#07070d; border-color:transparent;
+    box-shadow:0 8px 26px -10px #8b5cff;
+  }
+  .btn.primary:hover{box-shadow:0 10px 32px -8px #8b5cff}
+  .btn.icon{padding:9px 11px; font-size:14px; line-height:1}
+
+  .note{
+    position:absolute; top:0; left:0; width:214px; padding:9px 10px 12px;
+    border-radius:16px; cursor:default; touch-action:none;
+    background:linear-gradient(158deg, var(--c-soft), rgba(9,9,17,.85));
+    border:1px solid var(--c-line);
+    box-shadow:0 16px 40px -16px rgba(0,0,0,.95), 0 0 34px -16px var(--c), inset 0 1px 0 rgba(255,255,255,.06);
+    will-change:transform;
+    animation:appear .3s ease both;
+  }
+  @keyframes appear{from{opacity:0; filter:blur(8px)}to{opacity:1; filter:blur(0)}}
+  .note.gone{animation:vanish .22s ease forwards}
+  @keyframes vanish{to{opacity:0; filter:blur(8px); transform:scale(.92) translate(var(--tx),var(--ty))}}
+  .note.dragging{
+    box-shadow:0 34px 70px -22px rgba(0,0,0,1), 0 0 46px -12px var(--c);
+    border-color:var(--c); cursor:grabbing;
+  }
+  .handle{display:flex; align-items:center; gap:6px; height:20px; cursor:grab; touch-action:none}
+  .note.dragging .handle{cursor:grabbing}
+  .who{
+    flex:1; min-width:0; font-size:9.5px; font-weight:800; letter-spacing:.13em;
+    text-transform:uppercase; opacity:.95; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .acts{display:flex; gap:1px; opacity:0; transition:opacity .16s}
+  .note:hover .acts, .note.dragging .acts{opacity:1}
+  .acts button{
+    all:unset; width:19px; height:19px; display:grid; place-items:center; cursor:pointer;
+    border-radius:6px; font-size:10px; color:#d3d3e6; transition:.14s;
+  }
+  .acts button:hover{background:rgba(255,255,255,.16); color:#fff}
+  .acts .a-del:hover{background:rgba(255,80,110,.28); color:#ff8098}
+
+  .body{
+    margin-top:5px; min-height:98px; max-height:270px; overflow:auto; outline:none;
+    font-size:14px; line-height:1.46; color:#f3f3fb; white-space:pre-wrap; word-break:break-word;
+    scrollbar-width:thin; scrollbar-color:rgba(255,255,255,.18) transparent;
+  }
+  .body::-webkit-scrollbar{width:5px}
+  .body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18); border-radius:9px}
+  .body:empty::before{content:"write something…"; color:rgba(255,255,255,.24); pointer-events:none}
+
+  #cursors{position:fixed; inset:0; pointer-events:none; z-index:9500}
+  .cursor{
+    position:absolute; top:0; left:0; will-change:transform;
+    transition:transform .09s linear, opacity .4s;
+    filter:drop-shadow(0 0 8px currentColor);
+  }
+  .cursor svg{display:block}
+  .cursor .tag{
+    position:absolute; left:15px; top:15px; padding:2.5px 8px; border-radius:99px;
+    font-size:10px; font-weight:800; color:#07070d; white-space:nowrap; letter-spacing:.03em;
+  }
+
+  .emoji{
+    position:fixed; font-size:28px; pointer-events:none; z-index:9600;
+    animation:floatUp 1.5s cubic-bezier(.2,.8,.3,1) forwards;
+  }
+  @keyframes floatUp{
+    0%{transform:translate(-50%,-50%) scale(.4); opacity:0}
+    18%{transform:translate(-50%,-60%) scale(1.2); opacity:1}
+    100%{transform:translate(-50%,-260%) scale(.95); opacity:0}
+  }
+
+  #hint{
+    position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+    text-align:center; pointer-events:none; color:#6a6a86; user-select:none;
+    transition:opacity .4s;
+  }
+  #hint h2{margin:0 0 8px; font-size:20px; letter-spacing:.05em; color:#8f8fb0; font-weight:700}
+  #hint p{margin:0; font-size:13px}
+  #hint.hide{opacity:0}
+
+  #toasts{position:fixed; left:50%; bottom:26px; transform:translateX(-50%); z-index:9800; display:flex; flex-direction:column; gap:8px; align-items:center}
+  .toast{
+    font-size:13px; padding:10px 16px; border-radius:12px; color:#fff;
+    background:rgba(30,20,45,.92); border:1px solid rgba(255,120,150,.35);
+    box-shadow:0 14px 40px -12px #000; animation:appear .25s ease both;
+  }
+
+  #setup{
+    position:fixed; inset:0; z-index:10000; display:none; place-items:center; padding:20px;
+    background:rgba(4,4,10,.9); -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
+  }
+  #setup.show{display:grid}
+  .card{
+    width:min(600px,100%); max-height:92vh; overflow:auto;
+    background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.1);
+    border-radius:22px; padding:28px; box-shadow:0 40px 100px -30px #000;
+    animation:appear .35s ease both;
+  }
+  .card h1{margin:0 0 6px; font-size:22px; letter-spacing:.03em}
+  .card .sub{margin:0 0 22px; font-size:13.5px; color:#8b8ba7; line-height:1.55}
+  .field{margin-bottom:14px}
+  .field label{display:block; font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#8b8ba7; margin-bottom:7px}
+  .field input{
+    width:100%; padding:12px 14px; border-radius:11px; font-size:13.5px; color:#e9e9f2;
+    background:rgba(0,0,0,.35); border:1px solid rgba(255,255,255,.12); outline:none;
+    transition:.16s; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  .field input:focus{border-color:#8b5cff; box-shadow:0 0 0 3px rgba(139,92,255,.18)}
+  .row{display:flex; gap:10px; margin-top:20px}
+  .row .btn{flex:1}
+  .err{color:#ff8098; font-size:13px; margin:0 0 14px; display:none}
+  .err.show{display:block}
+</style>
+</head>
+<body>
+
+<div id="canvas">
+  <div id="hint">
+    <h2>the wall is empty</h2>
+    <p>Hit <strong>+ Note</strong> to drop the first idea.</p>
+  </div>
+</div>
+
+<div id="cursors"></div>
+
+<header id="bar">
+  <div class="brand"><span class="orb"></span> NEBULA</div>
+  <div class="right">
+    <div class="people" id="people"></div>
+    <span class="status" id="status"><i></i><span id="statusText">connecting</span></span>
+    <button class="btn primary" id="add">+ Note</button>
+    <button class="btn icon" id="gear" title="Settings">⚙</button>
+  </div>
+</header>
+
+<div id="toasts"></div>
+
+<div id="setup">
+  <div class="card">
+    <h1>Connect Supabase</h1>
+    <p class="sub">Paste your Project URL and anon/public key. Stored locally in this browser only — nothing is sent anywhere else.</p>
+    <p class="err" id="setupErr"></p>
+
+    <div class="field">
+      <label>Project URL</label>
+      <input id="s-url" placeholder="https://xxxxxxxxxxxx.supabase.co" autocomplete="off" spellcheck="false" />
+    </div>
+    <div class="field">
+      <label>Anon / publishable key</label>
+      <input id="s-key" placeholder="sb_publishable_...  or  eyJhbGci..." autocomplete="off" spellcheck="false" />
+    </div>
+
+    <div class="row">
+      <button class="btn" id="s-cancel" style="display:none">Cancel</button>
+      <button class="btn primary" id="s-save">Connect →</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+const $  = s => document.querySelector(s);
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const uid  = () => crypto.randomUUID?.() ?? 'id-' + Math.random().toString(36).slice(2) + Date.now();
+const hexA = (h, a) => {
+  const n = parseInt(h.slice(1), 16);
+  return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`;
+};
+
+const PALETTE = ['yellow','pink','cyan','green','violet','orange'];
+const HEX = {
+  yellow:'#ffd93d', pink:'#ff6b9d', cyan:'#4dd4ff',
+  green:'#6bff9d', violet:'#b28dff', orange:'#ffa94d'
+};
+const NAMES = ['Nova','Comet','Pulsar','Quasar','Orion','Vega','Lyra','Atlas',
+               'Rigel','Sirius','Zenith','Cosmo','Astra','Nyx','Echo','Meteor'];
+const EMOJI = ['✨','🔥','💡','🎯','🚀','💜','⚡','🌈','🧠','👀','🎉','🍕'];
+
+/* identity */
+let me;
+try { me = JSON.parse(sessionStorage.getItem('nebula.me')); } catch {}
+if (!me) {
+  me = { id: uid(), name: pick(NAMES), color: pick(Object.values(HEX)) };
+  sessionStorage.setItem('nebula.me', JSON.stringify(me));
+}
+
+/* config */
+const CFG = {
+  url: (localStorage.getItem('nebula.url') || '').replace(/\/+$/,'').replace(/\/rest\/v1$/,''),
+  key: (localStorage.getItem('nebula.key') || '').trim()
+};
+
+const setupEl = $('#setup');
+function showSetup(err) {
+  setupEl.classList.add('show');
+  $('#s-url').value = CFG.url;
+  $('#s-key').value = CFG.key;
+  $('#s-cancel').style.display = (CFG.url && CFG.key) ? '' : 'none';
+  const e = $('#setupErr');
+  if (err) { e.textContent = err; e.classList.add('show'); }
+  else e.classList.remove('show');
+}
+$('#s-save').onclick = () => {
+  const u = $('#s-url').value.trim().replace(/\/+$/,'').replace(/\/rest\/v1$/,'');
+  const k = $('#s-key').value.trim();
+  if (!u || !k) return showSetup('Both fields are required.');
+  localStorage.setItem('nebula.url', u);
+  localStorage.setItem('nebula.key', k);
+  location.reload();
+};
+$('#s-cancel').onclick = () => setupEl.classList.remove('show');
+$('#gear').onclick = () => showSetup();
+
+/* state */
+const canvas  = $('#canvas');
+const cursors = $('#cursors');
+const notes   = new Map();
+let sb, room, zTop = 10;
+let moveBuf=null, moveTimer=null, cursorBuf=null, cursorTimer=null;
+
+function toast(msg) {
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  $('#toasts').appendChild(el);
+  setTimeout(() => {
+    el.style.transition = 'opacity .3s, transform .3s';
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(10px)';
+    setTimeout(() => el.remove(), 320);
+  }, 4200);
+}
+
+function setStatus(state) {
+  const el = $('#status'), txt = $('#statusText');
+  el.classList.remove('live','dead');
+  if (state === 'SUBSCRIBED') { el.classList.add('live'); txt.textContent = 'live'; }
+  else if (state === 'CHANNEL_ERROR' || state === 'TIMED_OUT') { el.classList.add('dead'); txt.textContent='offline'; }
+  else { txt.textContent = 'connecting'; }
+}
+
+function setPos(el, x, y) {
+  el.style.setProperty('--tx', x + 'px');
+  el.style.setProperty('--ty', y + 'px');
+  el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+}
+
+function renderNote(entry) {
+  const { el, data } = entry;
+  const hex = HEX[data.color] || HEX.yellow;
+  el.style.setProperty('--c', hex);
+  el.style.setProperty('--c-soft', hexA(hex, .13));
+  el.style.setProperty('--c-line', hexA(hex, .42));
+  if (!el.classList.contains('dragging')) setPos(el, data.x, data.y);
+
+  const body = el.querySelector('.body');
+  const text = data.text || '';
+  if (document.activeElement !== body && body.innerText !== text) body.innerText = text;
+
+  const who = el.querySelector('.who');
+  who.textContent = data.author || '';
+  who.style.color = hex;
+}
+
+function createNoteEl(data) {
+  const el = document.createElement('article');
+  el.className = 'note';
+  el.dataset.id = data.id;
+  el.innerHTML = `
+    <div class="handle">
+      <span class="who"></span>
+      <div class="acts">
+        <button class="a-react" title="React">✦</button>
+        <button class="a-color" title="Recolour">◐</button>
+        <button class="a-del"   title="Delete">✕</button>
+      </div>
+    </div>
+    <div class="body" contenteditable="true" spellcheck="false"></div>
+  `;
+  return el;
+}
+
+function upsertNote(row) {
+  let entry = notes.get(row.id);
+  if (!entry) {
+    const el = createNoteEl(row);
+    canvas.appendChild(el);
+    entry = { el, data: { ...row } };
+    notes.set(row.id, entry);
+    wireNote(entry);
+    updateEmpty();
+  } else {
+    Object.assign(entry.data, row);
+  }
+  renderNote(entry);
+}
+
+function dropNote(id) {
+  const entry = notes.get(id);
+  if (!entry) return;
+  notes.delete(id);
+  const el = entry.el;
+  el.style.pointerEvents = 'none';
+  el.classList.add('gone');
+  setTimeout(() => { el.remove(); updateEmpty(); }, 240);
+  updateEmpty();
+}
+
+function updateEmpty() {
+  $('#hint').classList.toggle('hide', notes.size > 0);
+}
+
+function bringFront(entry) { entry.el.style.zIndex = ++zTop; }
+
+function wireNote(entry) {
+  const { el, data } = entry;
+  const handle = el.querySelector('.handle');
+  const body   = el.querySelector('.body');
+
+  el.addEventListener('pointerdown', () => bringFront(entry), true);
+
+  handle.addEventListener('pointerdown', e => {
+    if (e.target.closest('button')) return;
+    e.preventDefault();
+    bringFront(entry);
+    el.classList.add('dragging');
+    handle.setPointerCapture(e.pointerId);
+
+    const sx = e.clientX, sy = e.clientY;
+    const ox = data.x, oy = data.y;
+    let moved = false;
+
+    const onMove = ev => {
+      const dx = ev.clientX - sx, dy = ev.clientY - sy;
+      if (!moved && Math.abs(dx) + Math.abs(dy) > 3) moved = true;
+      data.x = ox + dx;
+      data.y = oy + dy;
+      setPos(el, data.x, data.y);
+      queueMove(data.id, data.x, data.y);
+    };
+
+    const onUp = async () => {
+      handle.removeEventListener('pointermove', onMove);
+      handle.removeEventListener('pointerup', onUp);
+      handle.removeEventListener('pointercancel', onUp);
+      el.classList.remove('dragging');
+      if (!moved) return;
+      const { error } = await sb.from('notes').update({ x: data.x, y: data.y }).eq('id', data.id);
+      if (error) toast(error.message);
+    };
+
+    handle.addEventListener('pointermove', onMove);
+    handle.addEventListener('pointerup', onUp);
+    handle.addEventListener('pointercancel', onUp);
+  });
+
+  body.addEventListener('keydown', e => { if (e.key === 'Escape') body.blur(); });
+
+  body.addEventListener('blur', async () => {
+    const text = body.innerText.replace(/\n{3,}/g, '\n\n').trim();
+    if (!text) return removeNote(data.id);
+    if (text === (data.text || '')) { body.innerText = text; return; }
+    data.text = text;
+    body.innerText = text;
+    const { error } = await sb.from('notes').update({ text }).eq('id', data.id);
+    if (error) toast(error.message);
+  });
+
+  el.querySelector('.a-color').onclick = async e => {
+    e.stopPropagation();
+    const i = PALETTE.indexOf(data.color);
+    const next = PALETTE[(i + 1) % PALETTE.length];
+    data.color = next;
+    renderNote(entry);
+    const { error } = await sb.from('notes').update({ color: next }).eq('id', data.id);
+    if (error) toast(error.message);
+  };
+
+  el.querySelector('.a-react').onclick = e => {
+    e.stopPropagation();
+    const emoji = pick(EMOJI);
+    const x = data.x + 105, y = data.y + 30;
+    spawnEmoji(x, y, emoji);
+    room?.send({ type:'broadcast', event:'react', payload:{ x, y, emoji } });
+  };
+
+  el.querySelector('.a-del').onclick = e => {
+    e.stopPropagation();
+    removeNote(data.id);
+  };
+}
+
+async function removeNote(id) {
+  dropNote(id);
+  const { error } = await sb.from('notes').delete().eq('id', id);
+  if (error) toast(error.message);
+}
+
+async function addNote() {
+  const x = Math.max(20, Math.min(innerWidth - 240, innerWidth / 2 - 107 + (Math.random()*200-100)));
+  const y = Math.max(80, Math.min(innerHeight - 220, innerHeight / 2 - 70 + (Math.random()*160-80)));
+  const { data, error } = await sb.from('notes')
+    .insert({ x, y, text:'', color: pick(PALETTE), author: me.name })
+    .select().single();
+  if (error) return toast(error.message);
+  upsertNote(data);
+  bringFront(notes.get(data.id));
+  setTimeout(() => notes.get(data.id)?.el.querySelector('.body').focus(), 70);
+}
+$('#add').onclick = addNote;
+
+function queueMove(id, x, y) {
+  moveBuf = { id, x, y };
+  if (moveTimer) return;
+  moveTimer = setTimeout(() => {
+    moveTimer = null;
+    if (moveBuf) { room?.send({ type:'broadcast', event:'move', payload: moveBuf }); moveBuf = null; }
+  }, 45);
+}
+
+addEventListener('pointermove', e => {
+  if (!room) return;
+  cursorBuf = { id: me.id, name: me.name, color: me.color, x: e.clientX, y: e.clientY };
+  if (cursorTimer) return;
+  cursorTimer = setTimeout(() => {
+    cursorTimer = null;
+    if (cursorBuf) { room.send({ type:'broadcast', event:'cursor', payload: cursorBuf }); cursorBuf = null; }
+  }, 55);
+}, { passive:true });
+
+const cursorEls = new Map();
+function drawCursor(p) {
+  if (p.id === me.id) return;
+  let el = cursorEls.get(p.id);
+  if (!el) {
+    el = document.createElement('div');
+    el.className = 'cursor';
+    el.innerHTML = `
+      <svg width="19" height="19" viewBox="0 0 24 24">
+        <path d="M4 2l6.6 18 2.6-7.6L21 10z" fill="currentColor"
+              stroke="rgba(0,0,0,.45)" stroke-width="1.2" stroke-linejoin="round"/>
+      </svg>
+      <span class="tag"></span>`;
+    cursors.appendChild(el);
+    cursorEls.set(p.id, el);
+  }
+  el.style.color = p.color;
+  el.style.transform = `translate3d(${p.x}px, ${p.y}px, 0)`;
+  const tag = el.querySelector('.tag');
+  tag.textContent = p.name;
+  tag.style.background = p.color;
+  clearTimeout(el._kill);
+  el._kill = setTimeout(() => { el.remove(); cursorEls.delete(p.id); }, 7000);
+}
+
+function spawnEmoji(x, y, emoji) {
+  const el = document.createElement('div');
+  el.className = 'emoji';
+  el.textContent = emoji;
+  el.style.left = x + 'px';
+  el.style.top  = y + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1600);
+}
+
+function renderPeople() {
+  if (!room) return;
+  const state = room.presenceState();
+  const users = Object.values(state).flat();
+  const box = $('#people');
+  box.innerHTML = '';
+  users.slice(0, 6).forEach(u => {
+    const d = document.createElement('div');
+    d.className = 'avatar';
+    d.style.background = u.color || '#888';
+    d.style.color = '#07070d';
+    d.textContent = (u.name || '?')[0].toUpperCase();
+    d.title = u.name || '';
+    box.appendChild(d);
+  });
+  if (users.length > 6) {
+    const d = document.createElement('div');
+    d.className = 'avatar more';
+    d.textContent = '+' + (users.length - 6);
+    box.appendChild(d);
+  }
+  const txt = $('#statusText');
+  if ($('#status').classList.contains('live')) txt.textContent = users.length + ' here';
+}
+
+async function boot() {
+  if (!CFG.url || !CFG.key) return showSetup();
+
+  try {
+    sb = createClient(CFG.url, CFG.key, { realtime: { params: { eventsPerSecond: 25 } } });
+  } catch {
+    return showSetup('That Supabase URL looks invalid.');
+  }
+
+  const { data, error } = await sb.from('notes').select('*').order('created_at', { ascending:true });
+  if (error) return showSetup('Could not read "notes" — did you run the SQL? (' + error.message + ')');
+  data.forEach(upsertNote);
+  updateEmpty();
+
+  sb.channel('nebula-db')
+    .on('postgres_changes', { event:'*', schema:'public', table:'notes' }, payload => {
+      if (payload.eventType === 'DELETE') dropNote(payload.old.id);
+      else upsertNote(payload.new);
+    })
+    .subscribe();
+
+  room = sb.channel('nebula-room', { config: { presence: { key: me.id } } });
+  room
+    .on('presence', { event:'sync' }, renderPeople)
+    .on('broadcast', { event:'cursor' }, ({ payload }) => drawCursor(payload))
+    .on('broadcast', { event:'move' }, ({ payload }) => {
+      const entry = notes.get(payload.id);
+      if (!entry || entry.el.classList.contains('dragging')) return;
+      entry.data.x = payload.x; entry.data.y = payload.y;
+      setPos(entry.el, payload.x, payload.y);
+    })
+    .on('broadcast', { event:'react' }, ({ payload }) => spawnEmoji(payload.x, payload.y, payload.emoji))
+    .subscribe(async status => {
+      setStatus(status);
+      if (status === 'SUBSCRIBED') {
+        await room.track({ name: me.name, color: me.color, at: Date.now() });
+        renderPeople();
+      }
+    });
+
+  addEventListener('beforeunload', () => room?.untrack());
+}
+
+boot();
+</script>
+</body>
+</html>
