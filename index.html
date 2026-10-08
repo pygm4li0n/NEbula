@@ -3,42 +3,36 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-<meta name="theme-color" content="#06060c" />
+<meta name="theme-color" content="#08080f" />
 <title>NEBULA · live wall</title>
 <style>
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html,body{height:100%;overscroll-behavior:none}
   body{
-    margin:0; overflow:hidden; color:#ececf5;
+    margin:0; overflow:hidden; color:#eaeaf2;
     font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Inter,Roboto,sans-serif;
-    background:#06060c; -webkit-font-smoothing:antialiased;
+    background:#08080f; -webkit-font-smoothing:antialiased;
     user-select:none; -webkit-user-select:none;
+    font-feature-settings:"ss01","cv01";
   }
   button{font-family:inherit;touch-action:manipulation}
-  input{font-family:inherit}
 
   /* ═══ background ═══ */
-  #aurora{
-    position:fixed; inset:-20%; pointer-events:none; z-index:0; opacity:.55;
+  #bg{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
     background:
-      radial-gradient(600px 300px at 20% 30%, rgba(140,90,255,.28), transparent 60%),
-      radial-gradient(700px 400px at 75% 65%, rgba(0,210,255,.20), transparent 60%),
-      radial-gradient(500px 250px at 50% 85%, rgba(255,90,180,.18), transparent 60%);
-    filter:blur(70px);
-    animation:drift 26s ease-in-out infinite alternate;
+      radial-gradient(1100px 700px at 15% -10%, rgba(139,92,246,.16), transparent 60%),
+      radial-gradient(900px 600px at 95% 110%, rgba(45,212,191,.11), transparent 60%),
+      radial-gradient(700px 500px at 50% 45%, rgba(236,72,153,.06), transparent 70%);
   }
-  @keyframes drift{
-    0%  {transform:translate3d(-2%,-2%,0) rotate(0)}
-    100%{transform:translate3d(2%,3%,0) rotate(6deg)}
-  }
-  #grid{
-    position:fixed; inset:0; pointer-events:none; z-index:1;
+  #bg::after{
+    content:""; position:absolute; inset:0;
     background-image:
-      linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
-    background-size:46px 46px;
-    -webkit-mask-image:radial-gradient(circle at 50% 40%, #000 30%, transparent 85%);
-    mask-image:radial-gradient(circle at 50% 40%, #000 30%, transparent 85%);
+      linear-gradient(rgba(255,255,255,.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.02) 1px, transparent 1px);
+    background-size:52px 52px;
+    -webkit-mask-image:radial-gradient(circle at 50% 40%, #000 25%, transparent 80%);
+    mask-image:radial-gradient(circle at 50% 40%, #000 25%, transparent 80%);
   }
 
   /* ═══ wall ═══ */
@@ -47,248 +41,263 @@
     overflow-y:auto; overflow-x:hidden;
     -webkit-overflow-scrolling:touch;
     scrollbar-width:thin;
-    scrollbar-color:rgba(255,255,255,.12) transparent;
+    scrollbar-color:rgba(255,255,255,.1) transparent;
   }
   #wall::-webkit-scrollbar{width:8px}
-  #wall::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12); border-radius:9px}
-  #wall::-webkit-scrollbar-track{background:transparent}
+  #wall::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1); border-radius:9px}
 
   /* ═══ top bar ═══ */
   #bar{
     position:fixed; top:0; left:0; right:0;
-    height:60px; padding:0 14px;
-    z-index:9000; display:flex; align-items:center; gap:12px;
-    background:linear-gradient(180deg, rgba(6,6,12,.94), rgba(6,6,12,.4) 70%, transparent);
-    -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
-    padding-top:env(safe-area-inset-top);
+    z-index:9000;
+    padding:0 16px;
     height:calc(60px + env(safe-area-inset-top));
+    padding-top:env(safe-area-inset-top);
+    display:flex; align-items:center; gap:14px;
+    background:linear-gradient(180deg, rgba(8,8,15,.95), rgba(8,8,15,.55) 65%, transparent);
+    -webkit-backdrop-filter:blur(16px) saturate(140%); backdrop-filter:blur(16px) saturate(140%);
+    border-bottom:1px solid rgba(255,255,255,.04);
   }
-  .brand{display:flex; align-items:center; gap:9px; font-weight:800; letter-spacing:.24em; font-size:13px; flex-shrink:0}
+  .brand{
+    display:flex; align-items:center; gap:10px;
+    font-weight:800; letter-spacing:.3em; font-size:12px; flex-shrink:0;
+    color:#fff;
+  }
   .orb{
-    width:13px; height:13px; border-radius:50%;
-    background:radial-gradient(circle at 32% 30%, #fff, #8b5cff 45%, #4dd4ff);
-    box-shadow:0 0 16px #8b5cff, 0 0 34px rgba(139,92,255,.6);
-    animation:pulse 2.6s ease-in-out infinite;
+    width:10px; height:10px; border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, #fff, #8b5cf6 50%, #2dd4bf);
+    box-shadow:0 0 14px #8b5cf6, 0 0 28px rgba(139,92,246,.5);
+    animation:pulse 3s ease-in-out infinite;
   }
-  @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.24);opacity:.72}}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:.6}}
 
-  #ticker{
+  #meta{
     flex:1; min-width:0;
-    display:flex; align-items:center; justify-content:center; gap:6px;
-    font-size:12.5px; font-weight:600; color:#a9a9c6;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    font-size:12px; color:#8a8aa0;
     white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-    opacity:0; transform:translateY(-4px);
-    transition:opacity .3s, transform .3s;
-    pointer-events:none;
   }
-  #ticker.show{opacity:1; transform:translateY(0)}
-  #ticker .dot{width:5px; height:5px; border-radius:50%; background:#8b5cff; box-shadow:0 0 8px #8b5cff; flex-shrink:0}
+  #meta .sep{opacity:.35}
+  #meta b{color:#c9c9dd; font-weight:700}
 
   .right{display:flex; align-items:center; gap:8px; flex-shrink:0}
-  .people{display:flex; align-items:center}
+  .people{display:flex; align-items:center; padding-left:9px}
   .avatar{
-    width:28px; height:28px; border-radius:50%; margin-left:-9px;
-    display:grid; place-items:center; font-size:11px; font-weight:800;
-    border:2px solid #0b0b14; color:#07070d;
-    box-shadow:0 0 12px -2px currentColor;
+    width:26px; height:26px; border-radius:50%; margin-left:-8px;
+    display:grid; place-items:center; font-size:10px; font-weight:800;
+    border:2px solid #08080f; color:#08080f;
+    box-shadow:0 0 10px -2px currentColor;
     animation:pop .3s cubic-bezier(.2,1.5,.4,1);
   }
   .avatar:first-child{margin-left:0}
-  .avatar.more{background:#23233a !important; color:#c9c9e0 !important}
+  .avatar.more{background:#1e1e30 !important; color:#a8a8c0 !important}
   @keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
 
   .status{
-    display:flex; align-items:center; gap:7px;
-    font-size:11px; font-weight:700; color:#8b8ba7;
-    letter-spacing:.08em; text-transform:uppercase;
-    padding:6px 11px; border-radius:99px;
-    background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.08);
+    display:flex; align-items:center; gap:6px;
+    font-size:10.5px; font-weight:700; color:#8a8aa0;
+    letter-spacing:.1em; text-transform:uppercase;
+    padding:5px 10px; border-radius:99px;
+    background:rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.06);
   }
-  .status i{width:7px; height:7px; border-radius:50%; background:#666; transition:.3s}
-  .status.live i{background:#3ce88a; box-shadow:0 0 10px #3ce88a}
-  .status.dead i{background:#ff5c7a; box-shadow:0 0 10px #ff5c7a}
+  .status i{width:6px; height:6px; border-radius:50%; background:#555; transition:.3s}
+  .status.live i{background:#34d399; box-shadow:0 0 8px #34d399}
+  .status.dead i{background:#f87171; box-shadow:0 0 8px #f87171}
 
   .btn{
-    all:unset; cursor:pointer; font-size:13px; font-weight:700; color:#ececf5;
-    padding:9px 14px; border-radius:11px; text-align:center;
-    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1);
-    transition:.16s; white-space:nowrap;
+    all:unset; cursor:pointer; font-size:13px; font-weight:600; color:#eaeaf2;
+    padding:8px 14px; border-radius:10px; text-align:center;
+    background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.08);
+    transition:.15s; white-space:nowrap;
   }
-  .btn:hover{background:rgba(255,255,255,.12); transform:translateY(-1px)}
-  .btn:active{transform:translateY(0) scale(.97)}
+  .btn:hover{background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.15)}
+  .btn:active{transform:scale(.97)}
   .btn.primary{
-    background:linear-gradient(140deg,#8b5cff,#4dd4ff);
-    color:#07070d; border-color:transparent;
-    box-shadow:0 8px 26px -10px #8b5cff;
+    background:linear-gradient(135deg,#8b5cf6,#2dd4bf);
+    color:#08080f; border-color:transparent;
+    box-shadow:0 6px 22px -8px rgba(139,92,246,.8);
   }
-  .btn.icon{padding:9px 11px; font-size:14px; line-height:1}
+  .btn.primary:hover{box-shadow:0 8px 28px -6px rgba(139,92,246,.9)}
+  .btn.icon{padding:8px 10px; font-size:14px; line-height:1}
 
   /* ═══ notes ═══ */
   .note{
     position:absolute; top:0; left:0;
-    padding:11px 13px 12px;
-    border-radius:16px;
-    background:linear-gradient(155deg, var(--c-soft), rgba(9,9,17,.92));
+    padding:12px 14px 12px;
+    border-radius:14px;
+    background:
+      linear-gradient(155deg, var(--c-soft), rgba(11,11,20,.96) 55%),
+      rgba(11,11,20,.96);
     border:1px solid var(--c-line);
     box-shadow:
-      0 14px 36px -18px rgba(0,0,0,.95),
-      0 0 30px -14px var(--c),
-      inset 0 1px 0 rgba(255,255,255,.06);
+      0 12px 32px -16px rgba(0,0,0,.9),
+      0 0 24px -12px var(--c),
+      inset 0 1px 0 rgba(255,255,255,.05);
     transition:
-      transform .38s cubic-bezier(.2,.8,.3,1),
+      transform .4s cubic-bezier(.22,.9,.25,1),
       box-shadow .22s,
       border-color .22s,
-      opacity .3s;
+      padding .2s;
     will-change:transform;
-    animation:dropIn .42s cubic-bezier(.2,1.4,.35,1) both;
+    animation:dropIn .42s cubic-bezier(.2,1.3,.4,1) both;
     user-select:none; -webkit-user-select:none;
   }
-  @keyframes dropIn{from{opacity:0; filter:blur(10px)}to{opacity:1; filter:blur(0)}}
+  @keyframes dropIn{
+    from{opacity:0; filter:blur(10px); transform:translate3d(var(--tx),calc(var(--ty) + 8px),0) scale(.9)}
+    to  {opacity:1; filter:blur(0);    transform:translate3d(var(--tx),var(--ty),0) scale(1)}
+  }
   .note:hover{
     box-shadow:
-      0 22px 48px -20px rgba(0,0,0,1),
-      0 0 46px -10px var(--c),
+      0 20px 46px -18px rgba(0,0,0,.95),
+      0 0 42px -8px var(--c),
       inset 0 1px 0 rgba(255,255,255,.08);
-    border-color:var(--c);
   }
   .note.dragging{
     transition:none;
     box-shadow:
-      0 42px 90px -26px rgba(0,0,0,1),
-      0 0 60px -8px var(--c),
+      0 44px 90px -26px rgba(0,0,0,1),
+      0 0 55px -6px var(--c),
       inset 0 1px 0 rgba(255,255,255,.12);
     border-color:var(--c);
     z-index:5000;
   }
-  .note.gone{animation:vanish .28s ease forwards}
+  .note.gone{animation:vanish .26s ease forwards}
   @keyframes vanish{
-    to{opacity:0; filter:blur(10px); transform:scale(.9) translate(var(--tx),var(--ty))}
-  }
-  .note.fresh{animation:popIn .55s cubic-bezier(.2,1.5,.4,1) both}
-  @keyframes popIn{
-    0%  {opacity:0; transform:translate3d(var(--tx),var(--ty),0) scale(.7); filter:blur(10px)}
-    60% {opacity:1; filter:blur(0)}
-    100%{opacity:1; transform:translate3d(var(--tx),var(--ty),0) scale(1)}
+    to{opacity:0; filter:blur(10px); transform:translate3d(var(--tx),var(--ty),0) scale(.92)}
   }
 
+  /* head: only ~18px tall, always visible */
   .note-head{
-    display:flex; align-items:center; gap:8px; height:24px;
+    display:flex; align-items:center; gap:7px;
+    height:18px; margin-bottom:6px;
     cursor:grab; touch-action:none;
   }
   .note.dragging .note-head{cursor:grabbing}
-  .author{display:flex; align-items:center; gap:6px; flex:1; min-width:0}
+  .author{display:flex; align-items:center; gap:5px; flex:1; min-width:0}
   .author .dot{
-    width:8px; height:8px; border-radius:50%;
-    background:var(--c); box-shadow:0 0 10px var(--c); flex-shrink:0;
+    width:6px; height:6px; border-radius:50%;
+    background:var(--c); box-shadow:0 0 8px var(--c); flex-shrink:0;
   }
   .author .who{
-    font-size:10px; font-weight:800; letter-spacing:.14em; text-transform:uppercase;
-    color:var(--c); opacity:.95;
+    font-size:9.5px; font-weight:800; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--c); opacity:.9;
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
-  .acts{display:flex; gap:1px; opacity:0; transition:opacity .16s; flex-shrink:0}
+  .acts{display:flex; gap:1px; opacity:0; transition:opacity .15s; flex-shrink:0}
   .note:hover .acts, .note.dragging .acts{opacity:1}
   .acts button{
-    all:unset; width:22px; height:22px; display:grid; place-items:center;
-    cursor:pointer; border-radius:6px; font-size:11px;
-    color:#d3d3e6; transition:.14s;
+    all:unset; width:18px; height:18px; display:grid; place-items:center;
+    cursor:pointer; border-radius:5px; font-size:10px;
+    color:#9a9ab5; transition:.12s;
   }
-  .acts button:hover{background:rgba(255,255,255,.16); color:#fff}
-  .acts .a-del:hover{background:rgba(255,80,110,.3); color:#ff8098}
+  .acts button:hover{background:rgba(255,255,255,.1); color:#fff}
+  .acts .a-del:hover{background:rgba(248,113,113,.2); color:#fca5a5}
 
+  /* body: hugs content, no min-height wasted */
   .body{
-    margin:6px 0 0;
-    font-size:14px; line-height:1.5; color:#f5f5fd;
+    font-size:14.5px; line-height:1.5; color:#f4f4fa;
     white-space:pre-wrap; word-break:break-word;
     outline:none; cursor:text;
-    min-height:26px; max-height:300px; overflow:auto;
+    max-height:280px; overflow:auto;
     user-select:text; -webkit-user-select:text;
-    scrollbar-width:thin; scrollbar-color:rgba(255,255,255,.18) transparent;
+    scrollbar-width:thin; scrollbar-color:rgba(255,255,255,.15) transparent;
+    min-height:1.5em; /* one line for the placeholder */
   }
-  .body::-webkit-scrollbar{width:5px}
-  .body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18); border-radius:9px}
-  .body:empty::before{content:"type something…"; color:rgba(255,255,255,.22); pointer-events:none}
+  .body::-webkit-scrollbar{width:4px}
+  .body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15); border-radius:9px}
+  .body:empty::before{
+    content:"write…"; color:rgba(255,255,255,.2);
+    pointer-events:none;
+  }
 
-  /* typing strip INSIDE note */
+  /* typing strip — sits INSIDE, tight, appears/disappears cleanly */
   .typing-strip{
     display:none;
-    align-items:center; gap:6px;
+    align-items:center; gap:7px;
     margin-top:8px; padding:5px 9px;
-    border-radius:9px;
-    background:rgba(255,255,255,.045);
-    border:1px solid rgba(255,255,255,.07);
-    font-size:11px; font-weight:600;
-    animation:popIn .3s ease both;
+    border-radius:8px;
+    background:rgba(255,255,255,.035);
+    border:1px solid rgba(255,255,255,.06);
+    font-size:11px; font-weight:500;
+    color:#a8a8c0;
+    animation:stripIn .22s ease both;
   }
+  @keyframes stripIn{from{opacity:0; transform:translateY(-4px)}to{opacity:1; transform:translateY(0)}}
   .typing-strip.on{display:flex}
-  .typing-strip .who{color:#c9c9e0}
+  .typing-strip .who{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
   .typing-strip .who b{font-weight:800}
-  .typing-dots{display:inline-flex; gap:3px; align-items:center}
+  .typing-dots{display:inline-flex; gap:2.5px; align-items:center; flex-shrink:0}
   .typing-dots i{
-    width:5px; height:5px; border-radius:50%;
+    width:4.5px; height:4.5px; border-radius:50%; display:block;
     animation:typebob 1.05s ease-in-out infinite;
   }
   .typing-dots i:nth-child(2){animation-delay:.15s}
   .typing-dots i:nth-child(3){animation-delay:.3s}
   @keyframes typebob{
-    0%,60%,100%{transform:translateY(0); opacity:.5}
-    30%        {transform:translateY(-4px); opacity:1}
+    0%,60%,100%{transform:translateY(0); opacity:.45}
+    30%        {transform:translateY(-3.5px); opacity:1}
   }
 
-  /* reactions */
+  /* reactions — compact, hover-only until they exist */
   .react-bar{
-    display:flex; flex-wrap:wrap; gap:5px;
-    margin-top:10px; min-height:24px; align-items:center;
+    display:none;
+    flex-wrap:wrap; gap:4px;
+    margin-top:9px; align-items:center;
   }
+  .react-bar.on,
+  .note:hover .react-bar{display:flex}
   .react-chip{
     all:unset; cursor:pointer;
-    display:inline-flex; align-items:center; gap:5px;
-    padding:3px 9px 4px; border-radius:99px;
-    background:rgba(255,255,255,.07);
-    border:1px solid rgba(255,255,255,.1);
-    transition:.15s; font-size:13px;
-    animation:chipIn .3s cubic-bezier(.2,1.5,.4,1);
+    display:inline-flex; align-items:center; gap:4px;
+    padding:2px 8px 3px; border-radius:99px;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.09);
+    transition:.14s; font-size:12.5px; line-height:1.15;
+    animation:chipIn .25s cubic-bezier(.2,1.5,.4,1);
   }
   @keyframes chipIn{from{transform:scale(0); opacity:0}to{transform:scale(1); opacity:1}}
-  .react-chip:hover{background:rgba(255,255,255,.14); transform:translateY(-1px)}
-  .react-chip b{font-size:11px; font-weight:800; color:#cfcfe6}
+  .react-chip:hover{background:rgba(255,255,255,.12); transform:translateY(-1px)}
+  .react-chip b{font-size:10.5px; font-weight:800; color:#c0c0d8}
   .react-chip.mine{
-    background:color-mix(in srgb, var(--c) 26%, transparent);
-    border-color:color-mix(in srgb, var(--c) 60%, transparent);
+    background:color-mix(in srgb, var(--c) 22%, transparent);
+    border-color:color-mix(in srgb, var(--c) 50%, transparent);
   }
   .react-chip.mine b{color:#fff}
   .react-add{
     all:unset; cursor:pointer;
     display:inline-flex; align-items:center; justify-content:center;
-    width:26px; height:26px; border-radius:99px;
-    font-size:15px; font-weight:600; line-height:1;
-    color:#8b8ba7;
-    background:rgba(255,255,255,.05);
-    border:1px dashed rgba(255,255,255,.18);
+    width:22px; height:22px; border-radius:99px;
+    font-size:13px; font-weight:600; line-height:1;
+    color:#7a7a95;
+    background:rgba(255,255,255,.04);
+    border:1px dashed rgba(255,255,255,.14);
     transition:.15s;
   }
   .react-add:hover{
-    color:#fff; background:rgba(255,255,255,.13);
+    color:#fff; background:rgba(255,255,255,.1);
     border-color:var(--c); border-style:solid;
   }
 
-  /* picker */
+  /* picker — bulletproof */
   .emoji-picker{
     position:fixed; z-index:9700;
-    display:flex; flex-wrap:wrap; gap:2px; padding:7px;
-    border-radius:16px; max-width:min(340px, 92vw);
-    background:rgba(20,20,32,.97);
-    border:1px solid rgba(255,255,255,.12);
-    box-shadow:0 24px 60px -14px #000;
-    -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
-    animation:popIn .18s cubic-bezier(.2,1.5,.4,1);
+    display:flex; flex-wrap:wrap; gap:2px; padding:6px;
+    border-radius:14px; max-width:min(320px, 92vw);
+    background:rgba(18,18,28,.98);
+    border:1px solid rgba(255,255,255,.1);
+    box-shadow:0 20px 55px -14px #000, 0 0 0 1px rgba(139,92,246,.15);
+    -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px);
+    animation:popIn .16s cubic-bezier(.2,1.5,.4,1);
+    touch-action:manipulation;
   }
+  @keyframes popIn{from{transform:translateY(6px) scale(.94); opacity:0}to{transform:translateY(0) scale(1); opacity:1}}
   .emoji-picker button{
     all:unset; cursor:pointer;
     width:38px; height:38px; display:grid; place-items:center;
-    border-radius:10px; font-size:21px; transition:.12s;
+    border-radius:9px; font-size:20px;
+    transition:.12s; touch-action:manipulation;
   }
-  .emoji-picker button:hover{background:rgba(255,255,255,.14); transform:scale(1.14)}
+  .emoji-picker button:hover{background:rgba(255,255,255,.12); transform:scale(1.15)}
   .emoji-picker button:active{transform:scale(.9)}
 
   /* cursors */
@@ -300,30 +309,21 @@
   }
   .cursor svg{display:block}
   .cursor .tag{
-    position:absolute; left:15px; top:15px;
+    position:absolute; left:14px; top:14px;
     padding:2.5px 8px; border-radius:99px;
-    font-size:10px; font-weight:800; color:#07070d;
+    font-size:10px; font-weight:800; color:#08080f;
     white-space:nowrap; letter-spacing:.03em;
   }
 
   /* emoji float */
   .emoji-fly{
-    position:fixed; font-size:26px; pointer-events:none; z-index:9600;
-    animation:floatUp 1.6s cubic-bezier(.2,.8,.3,1) forwards;
+    position:fixed; font-size:24px; pointer-events:none; z-index:9600;
+    animation:floatUp 1.5s cubic-bezier(.2,.8,.3,1) forwards;
   }
   @keyframes floatUp{
     0%  {transform:translate(-50%,-50%) scale(.3); opacity:0}
-    18% {transform:translate(-50%,-62%) scale(1.25); opacity:1}
+    18% {transform:translate(-50%,-62%) scale(1.2); opacity:1}
     100%{transform:translate(-50%,-260%) scale(.9); opacity:0}
-  }
-  .spark{
-    position:fixed; width:6px; height:6px; border-radius:50%;
-    pointer-events:none; z-index:9550;
-    animation:spark .72s ease-out forwards;
-  }
-  @keyframes spark{
-    0%  {transform:translate(-50%,-50%) scale(1); opacity:1}
-    100%{transform:translate(calc(-50% + var(--bx)), calc(-50% + var(--by))) scale(0); opacity:0}
   }
 
   /* empty state */
@@ -334,18 +334,16 @@
   }
   #hint.hide{opacity:0}
   #hint h2{
-    margin:0 0 10px; font-size:26px; letter-spacing:.04em; font-weight:800;
-    background:linear-gradient(120deg,#8b5cff,#4dd4ff,#ff6b9d);
+    margin:0 0 10px; font-size:24px; letter-spacing:.02em; font-weight:800;
+    background:linear-gradient(120deg,#8b5cf6,#2dd4bf,#ec4899);
     -webkit-background-clip:text; background-clip:text; color:transparent;
-    animation:hue 6s linear infinite;
   }
-  @keyframes hue{to{filter:hue-rotate(360deg)}}
-  #hint p{margin:0; font-size:13px; color:#6a6a86; line-height:1.7}
+  #hint p{margin:0; font-size:13px; color:#6a6a86; line-height:1.8}
   #hint kbd{
     font-family:inherit; font-size:11px; font-weight:700;
-    background:rgba(255,255,255,.08);
-    border:1px solid rgba(255,255,255,.12);
-    border-radius:5px; padding:1px 6px; margin:0 2px; color:#c9c9e0;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:5px; padding:2px 7px; margin:0 2px; color:#c0c0d8;
   }
 
   /* toasts */
@@ -357,32 +355,34 @@
     max-width:92vw;
   }
   .toast{
-    font-size:13px; padding:10px 16px; border-radius:12px; color:#fff;
-    background:rgba(30,20,45,.94);
-    border:1px solid rgba(255,120,150,.35);
+    font-size:13px; padding:10px 16px; border-radius:11px; color:#fff;
+    background:rgba(30,20,45,.95);
+    border:1px solid rgba(248,113,113,.35);
     box-shadow:0 14px 40px -12px #000;
     animation:popIn .25s ease both; text-align:center;
   }
 
   /* ═══ mobile ═══ */
   @media (max-width: 640px){
-    #bar{height:calc(56px + env(safe-area-inset-top)); padding:0 10px; gap:8px}
-    .brand{font-size:11px; letter-spacing:.16em; gap:7px}
-    .brand .orb{width:11px; height:11px}
-    #ticker{font-size:11.5px}
+    #bar{height:calc(54px + env(safe-area-inset-top)); padding:0 12px; gap:10px}
+    .brand{font-size:10.5px; letter-spacing:.22em; gap:8px}
+    .brand .orb{width:9px; height:9px}
+    #meta{font-size:11px}
     .right{gap:6px}
     .status{display:none}
-    .btn{padding:8px 12px; font-size:12.5px; border-radius:10px}
-    .btn.icon{padding:8px 10px}
-    .avatar{width:26px; height:26px; font-size:10px}
-    .note{padding:10px 12px 11px; border-radius:14px}
-    .note-head{height:26px}
-    .body{font-size:15px; max-height:38vh}
+    .btn{padding:7px 12px; font-size:12.5px; border-radius:9px}
+    .btn.icon{padding:7px 9px}
+    .avatar{width:24px; height:24px; font-size:9.5px}
+
+    .note{padding:11px 13px 11px}
+    .note-head{height:20px; margin-bottom:5px}
+    .body{font-size:15px}
     .acts{opacity:1}
-    .acts button{width:26px; height:26px; font-size:13px}
-    .react-chip{padding:4px 10px 5px; font-size:14px}
-    .react-add{width:30px; height:30px; font-size:17px}
-    .emoji-picker button{width:44px; height:44px; font-size:24px}
+    .acts button{width:22px; height:22px; font-size:12px}
+    .react-bar{display:flex} /* always visible on mobile */
+    .react-chip{padding:3px 9px 4px; font-size:13px}
+    .react-add{width:26px; height:26px; font-size:15px}
+    .emoji-picker button{width:44px; height:44px; font-size:22px}
     #hint h2{font-size:20px}
     #hint p{font-size:12px}
   }
@@ -391,15 +391,14 @@
 </head>
 <body>
 
-<div id="aurora"></div>
-<div id="grid"></div>
+<div id="bg"></div>
 
 <div id="wall">
   <div id="hint">
     <h2>the wall is waiting</h2>
     <p>
       <kbd>N</kbd> · or double-tap · or <strong>+ Note</strong><br>
-      drag the top of a note to reorder
+      drag the header to reorder
     </p>
   </div>
 </div>
@@ -408,10 +407,14 @@
 
 <header id="bar">
   <div class="brand"><span class="orb"></span> NEBULA</div>
-  <div id="ticker"><span class="dot"></span><span id="tickerText"></span></div>
+  <div id="meta">
+    <span id="metaCount">0 notes</span>
+    <span class="sep">·</span>
+    <span id="metaLive">connecting…</span>
+  </div>
   <div class="right">
     <div class="people" id="people"></div>
-    <span class="status" id="status"><i></i><span id="statusText">connecting</span></span>
+    <span class="status" id="status"><i></i><span id="statusText">live</span></span>
     <button class="btn primary" id="add">+ Note</button>
     <button class="btn icon" id="mute" title="Sound">🔊</button>
   </div>
@@ -422,11 +425,11 @@
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-/* ════════════════ config ════════════════ */
+/* ════════ config ════════ */
 const SUPABASE_URL = 'https://piexelytvvfsoeqhlokb.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_neiQC042cfc6Io2r8Cf6hw_WoecdytJ';
 
-/* ════════════════ helpers ════════════════ */
+/* ════════ helpers ════════ */
 const $    = s => document.querySelector(s);
 const pick = a => a[Math.floor(Math.random() * a.length)];
 const uid  = () => crypto.randomUUID?.() ?? 'id-' + Math.random().toString(36).slice(2) + Date.now();
@@ -438,15 +441,15 @@ const isMobile = () => innerWidth < 640;
 
 const PALETTE = ['yellow','pink','cyan','green','violet','orange'];
 const HEX = {
-  yellow:'#ffd93d', pink:'#ff6b9d', cyan:'#4dd4ff',
-  green:'#6bff9d', violet:'#b28dff', orange:'#ffa94d'
+  yellow:'#ffd93d', pink:'#f472b6', cyan:'#22d3ee',
+  green:'#34d399', violet:'#a78bfa', orange:'#fb923c'
 };
 const NAMES = ['Nova','Comet','Pulsar','Quasar','Orion','Vega','Lyra','Atlas',
                'Rigel','Sirius','Zenith','Cosmo','Astra','Nyx','Echo','Meteor',
                'Phoenix','Hydra','Indigo','Sol','Luna'];
 const REACTS = ['✨','🔥','💜','🚀','🎯','💡','😂','👍','❤️','🎉'];
 
-/* ════════════════ identity ════════════════ */
+/* ════════ identity ════════ */
 let me;
 try { me = JSON.parse(sessionStorage.getItem('nebula.me')); } catch {}
 if (!me) {
@@ -454,20 +457,20 @@ if (!me) {
   sessionStorage.setItem('nebula.me', JSON.stringify(me));
 }
 
-/* ════════════════ state ════════════════ */
+/* ════════ state ════════ */
 const wall    = $('#wall');
 const cursors = $('#cursors');
 const notes   = new Map();
 let sb, room, zTop = 10;
-let moveTimer=null, cursorTimer=null, cursorBuf=null;
+let cursorTimer = null, cursorBuf = null;
 let soundOn = localStorage.getItem('nebula.mute') !== '1';
-const typingUsers = new Map();
+const typingUsers = new Map();  // userId → { id, name, color, noteId, timer }
 const cursorEls = new Map();
 let layoutRaf = null;
 
-/* ════════════════ sound ════════════════ */
+/* ════════ sound ════════ */
 let actx;
-function blip(freq = 880, dur = 0.07, type = 'sine', gain = 0.045) {
+function blip(freq = 880, dur = 0.07, type = 'sine', gain = 0.04) {
   if (!soundOn) return;
   try {
     if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
@@ -481,7 +484,7 @@ function blip(freq = 880, dur = 0.07, type = 'sine', gain = 0.045) {
 }
 const chord = (f, d=0.14) => f.forEach((x,i) => setTimeout(() => blip(x, d), i*22));
 
-/* ════════════════ toast + ticker ════════════════ */
+/* ════════ toast ════════ */
 function toast(msg) {
   const el = document.createElement('div');
   el.className = 'toast'; el.textContent = msg;
@@ -493,16 +496,8 @@ function toast(msg) {
     setTimeout(() => el.remove(), 320);
   }, 4200);
 }
-let tickTimer;
-function tick(html) {
-  $('#tickerText').innerHTML = html;
-  const el = $('#ticker');
-  el.classList.add('show');
-  clearTimeout(tickTimer);
-  tickTimer = setTimeout(() => el.classList.remove('show'), 3600);
-}
 
-/* ════════════════ status ════════════════ */
+/* ════════ status ════════ */
 function setStatus(state) {
   const el = $('#status'), txt = $('#statusText');
   el.classList.remove('live','dead');
@@ -511,35 +506,25 @@ function setStatus(state) {
   else { txt.textContent = 'connecting'; }
 }
 
-/* ════════════════ layout engine ════════════════ */
+/* ════════ layout ════════ */
 function computeCols() {
-  const gap = 16;
-  const sideGap = 16;
-  const availW = innerWidth - sideGap * 2;
-  const minColW = isMobile() ? 260 : 250;
-  const maxColW = isMobile() ? 420 : 320;
-  let cols = Math.max(1, Math.min(4, Math.floor((availW + gap) / (minColW + gap))));
+  const gap = 16, side = 16;
+  const availW = innerWidth - side * 2;
+  const minW = isMobile() ? 240 : 240;
+  const maxW = isMobile() ? 480 : 300;
+  let cols = Math.max(1, Math.min(5, Math.floor((availW + gap) / (minW + gap))));
   let colW = Math.floor((availW - gap * (cols - 1)) / cols);
-  while (cols > 1 && colW > maxColW) {
+  while (cols > 1 && colW > maxW) {
     cols--;
     colW = Math.floor((availW - gap * (cols - 1)) / cols);
   }
   const totalW = cols * colW + (cols - 1) * gap;
-  const startX = Math.max(sideGap, (innerWidth - totalW) / 2);
-  const topY = ($('#bar').offsetHeight || 60) + 16;
+  const startX = Math.max(side, (innerWidth - totalW) / 2);
+  const topY = ($('#bar').offsetHeight || 60) + 20;
   return { gap, cols, colW, startX, topY };
 }
 
-let lastLayout = { maxY: 0 };
-function layoutAll(opts = {}) {
-  if (layoutRaf) cancelAnimationFrame(layoutRaf);
-  layoutRaf = requestAnimationFrame(() => {
-    layoutRaf = null;
-    doLayout(opts);
-  });
-}
-
-function doLayout(opts = {}) {
+function layoutNow(opts = {}) {
   const { floatingId = null, insertIndex = -1 } = opts;
   const L = computeCols();
 
@@ -571,7 +556,6 @@ function doLayout(opts = {}) {
 
     entry._layoutX = x;
     entry._layoutY = y;
-    entry._layoutW = L.colW;
 
     if (!entry.el.classList.contains('dragging')) {
       setPos(entry.el, x, y);
@@ -581,8 +565,16 @@ function doLayout(opts = {}) {
     maxBottom = Math.max(maxBottom, y + h);
   }
 
-  lastLayout.maxY = maxBottom;
   wall.style.minHeight = Math.max(innerHeight, maxBottom + 80) + 'px';
+  updateMeta();
+}
+
+function layoutAll(opts = {}) {
+  if (layoutRaf) cancelAnimationFrame(layoutRaf);
+  layoutRaf = requestAnimationFrame(() => {
+    layoutRaf = null;
+    layoutNow(opts);
+  });
 }
 
 function computeInsertIndex(clientY, floatingId) {
@@ -591,13 +583,12 @@ function computeInsertIndex(clientY, floatingId) {
     .sort((a, b) => (a.data.sort_order ?? 0) - (b.data.sort_order ?? 0));
   for (let i = 0; i < sorted.length; i++) {
     const rect = sorted[i].el.getBoundingClientRect();
-    const cy = rect.top + rect.height / 2;
-    if (clientY < cy) return i;
+    if (clientY < rect.top + rect.height / 2) return i;
   }
   return sorted.length;
 }
 
-/* ════════════════ note render ════════════════ */
+/* ════════ note render ════════ */
 function setPos(el, x, y, rot = 0) {
   el.style.setProperty('--tx', x + 'px');
   el.style.setProperty('--ty', y + 'px');
@@ -608,8 +599,8 @@ function renderNote(entry) {
   const { el, data } = entry;
   const hex = HEX[data.color] || HEX.yellow;
   el.style.setProperty('--c', hex);
-  el.style.setProperty('--c-soft', hexA(hex, .13));
-  el.style.setProperty('--c-line', hexA(hex, .42));
+  el.style.setProperty('--c-soft', hexA(hex, .12));
+  el.style.setProperty('--c-line', hexA(hex, .38));
 
   const body = el.querySelector('.body');
   const text = data.text || '';
@@ -656,8 +647,7 @@ function upsertNote(row) {
   }
   renderNote(entry);
   if (isNew) {
-    entry.el.classList.add('fresh');
-    setTimeout(() => entry.el.classList.remove('fresh'), 600);
+    entry.el.style.animation = 'dropIn .42s cubic-bezier(.2,1.3,.4,1) both';
   }
   layoutAll();
 }
@@ -666,14 +656,17 @@ function dropNote(id) {
   const entry = notes.get(id);
   if (!entry) return;
   notes.delete(id);
-  typingUsers.forEach((v, k) => { if (v.noteId === id) { clearTimeout(v.timer); typingUsers.delete(k); } });
+  // clear typing for that note
+  typingUsers.forEach((v, k) => {
+    if (v.noteId === id) { clearTimeout(v.timer); typingUsers.delete(k); }
+  });
   const el = entry.el;
   const rect = el.getBoundingClientRect();
   el.style.setProperty('--tx', rect.left + 'px');
   el.style.setProperty('--ty', rect.top + 'px');
   el.style.pointerEvents = 'none';
   el.classList.add('gone');
-  setTimeout(() => { el.remove(); updateEmpty(); }, 280);
+  setTimeout(() => { el.remove(); updateEmpty(); layoutAll(); }, 260);
   updateEmpty();
   layoutAll();
 }
@@ -681,15 +674,22 @@ function dropNote(id) {
 const updateEmpty = () => $('#hint').classList.toggle('hide', notes.size > 0);
 const bringFront  = entry => entry.el.style.zIndex = ++zTop;
 
-/* ════════════════ reactions ════════════════ */
+function updateMeta() {
+  const n = notes.size;
+  $('#metaCount').textContent = n === 0 ? 'empty' : n + (n === 1 ? ' note' : ' notes');
+}
+
+/* ════════ reactions ════════ */
 function renderReactions(entry) {
   const bar = entry.el.querySelector('.react-bar');
-  const openFor = document.querySelector('.emoji-picker');
-  if (openFor && openFor.dataset.noteId === entry.data.id) return;
+  const openFor = document.querySelector(`.emoji-picker[data-note-id="${entry.data.id}"]`);
+  if (openFor) return; // don't rebuild under an open picker
 
   const r = entry.data.reactions || {};
-  bar.innerHTML = '';
+  const hasAny = Object.values(r).some(a => Array.isArray(a) && a.length);
+  bar.classList.toggle('on', hasAny);
 
+  bar.innerHTML = '';
   Object.entries(r).forEach(([emoji, users]) => {
     if (!Array.isArray(users) || !users.length) return;
     const mine = users.includes(me.id);
@@ -722,6 +722,7 @@ async function toggleReaction(noteId, emoji) {
 
   entry.data.reactions = reactions;
   renderReactions(entry);
+  layoutAll();
 
   if (added) { burst(entry, emoji); blip(720 + Math.random() * 220, 0.06, 'triangle', 0.04); }
   else blip(420, 0.05, 'sine', 0.03);
@@ -732,11 +733,9 @@ async function toggleReaction(noteId, emoji) {
       ? 'Run the SQL — missing `reactions` column.'
       : error.message);
   }
-  // re-layout (heights may have changed)
-  layoutAll();
 }
 
-/* ════════════════ picker — FIXED ════════════════ */
+/* ════════ picker ════════ */
 function openPicker(entry, anchor) {
   const existing = document.querySelector(`.emoji-picker[data-note-id="${entry.data.id}"]`);
   if (existing) { closePicker(); return; }
@@ -745,50 +744,47 @@ function openPicker(entry, anchor) {
   const picker = document.createElement('div');
   picker.className = 'emoji-picker';
   picker.dataset.noteId = entry.data.id;
-
-  // kill pointer events from bubbling to document
   picker.addEventListener('pointerdown', e => e.stopPropagation());
 
   REACTS.forEach(em => {
     const b = document.createElement('button');
     b.type = 'button';
     b.textContent = em;
-    // use pointerdown for instant response, no click delay
+    // fire on pointerdown for instant, race-free response
     b.addEventListener('pointerdown', ev => {
       ev.stopPropagation();
       ev.preventDefault();
-      toggleReaction(entry.data.id, em);
+      const noteId = picker.dataset.noteId;
       closePicker();
+      toggleReaction(noteId, em);
     });
     picker.appendChild(b);
   });
 
   document.body.appendChild(picker);
 
-  // position
   const r  = anchor.getBoundingClientRect();
   const pw = picker.offsetWidth  || 260;
   const ph = picker.offsetHeight || 44;
   let left = r.left + r.width / 2 - pw / 2;
-  let top  = r.top - ph - 10;
+  let top  = r.top - ph - 8;
   left = Math.max(8, Math.min(innerWidth  - pw - 8, left));
-  if (top < ($('#bar').offsetHeight || 60) + 6) top = r.bottom + 10;
+  if (top < ($('#bar').offsetHeight || 60) + 6) top = r.bottom + 8;
   if (top + ph > innerHeight - 8) top = innerHeight - ph - 8;
   picker.style.left = left + 'px';
   picker.style.top  = top  + 'px';
 
-  // close on outside pointerdown — added AFTER current event loop, bubble phase
   setTimeout(() => {
     const closeOnOutside = e => {
       if (e.target.closest('.emoji-picker')) return;
       if (e.target.closest('.react-add'))     return;
-      document.removeEventListener('pointerdown', closeOnOutside);
       closePicker();
     };
     document.addEventListener('pointerdown', closeOnOutside);
     picker._closeHandler = closeOnOutside;
   }, 0);
 }
+
 function closePicker() {
   document.querySelectorAll('.emoji-picker').forEach(p => {
     if (p._closeHandler) document.removeEventListener('pointerdown', p._closeHandler);
@@ -796,7 +792,7 @@ function closePicker() {
   });
 }
 
-/* ════════════════ bursts ════════════════ */
+/* ════════ bursts ════════ */
 function burst(entry, emoji) {
   const rect = entry.el.getBoundingClientRect();
   const cx = rect.left + rect.width / 2;
@@ -808,61 +804,64 @@ function burst(entry, emoji) {
   fly.style.left = cx + 'px';
   fly.style.top  = cy + 'px';
   document.body.appendChild(fly);
-  setTimeout(() => fly.remove(), 1700);
-
-  const hex = HEX[entry.data.color] || '#fff';
-  for (let i = 0; i < 8; i++) {
-    const p = document.createElement('div');
-    p.className = 'spark';
-    p.style.left = cx + 'px';
-    p.style.top  = cy + 'px';
-    p.style.background = hex;
-    p.style.boxShadow = `0 0 10px ${hex}`;
-    const ang = (Math.PI * 2 * i) / 8 + Math.random() * 0.4;
-    const dist = 34 + Math.random() * 26;
-    p.style.setProperty('--bx', Math.cos(ang) * dist + 'px');
-    p.style.setProperty('--by', Math.sin(ang) * dist + 'px');
-    document.body.appendChild(p);
-    setTimeout(() => p.remove(), 780);
-  }
+  setTimeout(() => fly.remove(), 1600);
 }
 
-/* ════════════════ typing (inside note) ════════════════ */
+/* ════════ typing — robust ════════ */
 function renderTypingStrip(entry) {
   const strip = entry.el.querySelector('.typing-strip');
-  const users = [...typingUsers.values()].filter(u => u.noteId === entry.data.id && u.id !== me.id);
-  if (!users.length) { strip.classList.remove('on'); strip.innerHTML = ''; return; }
+  if (!strip) return;
 
-  const names = users.slice(0, 3).map(u => `<b style="color:${u.color}">${u.name}</b>`).join(', ');
-  const more = users.length > 3 ? ` +${users.length - 3}` : '';
-  const verb = users.length === 1 ? 'is' : 'are';
+  const users = [...typingUsers.values()]
+    .filter(u => u.noteId === entry.data.id && u.id !== me.id);
+
+  if (!users.length) {
+    if (strip.classList.contains('on')) {
+      strip.classList.remove('on');
+      strip.innerHTML = '';
+      requestAnimationFrame(() => layoutAll());
+    }
+    return;
+  }
+
+  const color = users[0].color;
+  const names = users.slice(0, 2).map(u => `<b style="color:${u.color}">${u.name}</b>`);
+  const more  = users.length > 2 ? ` +${users.length - 2}` : '';
+  const label = users.length === 1
+    ? `${names[0]} is typing`
+    : `${names.join(' & ')}${more} are typing`;
 
   strip.classList.add('on');
   strip.innerHTML = `
     <span class="typing-dots">
-      <i style="background:${users[0].color}; box-shadow:0 0 8px ${users[0].color}"></i>
-      <i style="background:${users[0].color}; box-shadow:0 0 8px ${users[0].color}"></i>
-      <i style="background:${users[0].color}; box-shadow:0 0 8px ${users[0].color}"></i>
+      <i style="background:${color};box-shadow:0 0 6px ${color}"></i>
+      <i style="background:${color};box-shadow:0 0 6px ${color}"></i>
+      <i style="background:${color};box-shadow:0 0 6px ${color}"></i>
     </span>
-    <span class="who">${names}${more} ${verb} typing…</span>
+    <span class="who">${label}</span>
   `;
+  requestAnimationFrame(() => layoutAll());
 }
-function renderTypingAll() { notes.forEach(renderTypingStrip); }
 
-function markTyping(payload) {
-  const existing = typingUsers.get(payload.id);
-  if (existing?.timer) clearTimeout(existing.timer);
+function markTyping(p) {
+  // p = { id, name, color, noteId }
+  const prev = typingUsers.get(p.id);
+  if (prev?.timer) clearTimeout(prev.timer);
+
   const timer = setTimeout(() => {
-    typingUsers.delete(payload.id);
-    renderTypingAll();
-    layoutAll();
-  }, 2200);
-  typingUsers.set(payload.id, { ...payload, timer });
-  renderTypingAll();
-  layoutAll();
+    typingUsers.delete(p.id);
+    renderAllTyping();
+  }, 2400);
+
+  typingUsers.set(p.id, { ...p, timer });
+  renderAllTyping();
 }
 
-/* ════════════════ wire note ════════════════ */
+function renderAllTyping() {
+  notes.forEach(e => renderTypingStrip(e));
+}
+
+/* ════════ wire note ════════ */
 function wireNote(entry) {
   const { el, data } = entry;
   const head = el.querySelector('.note-head');
@@ -870,7 +869,7 @@ function wireNote(entry) {
 
   el.addEventListener('pointerdown', () => bringFront(entry), true);
 
-  /* ── drag → reorder ── */
+  /* ── drag to reorder ── */
   head.addEventListener('pointerdown', e => {
     if (e.target.closest('button')) return;
     if (document.activeElement !== body) e.preventDefault();
@@ -881,29 +880,27 @@ function wireNote(entry) {
     const startX = e.clientX, startY = e.clientY;
     const origX = entry._layoutX ?? 0, origY = entry._layoutY ?? 0;
 
-    // current index from sort_order
-    const currentSorted = [...notes.values()].sort((a,b) => (a.data.sort_order ?? 0) - (b.data.sort_order ?? 0));
+    const currentSorted = [...notes.values()]
+      .sort((a,b) => (a.data.sort_order ?? 0) - (b.data.sort_order ?? 0));
     let currentIndex = currentSorted.findIndex(x => x.data.id === data.id);
 
     el.classList.add('dragging');
     el.style.transition = 'none';
 
-    // re-layout with phantom gap where it currently sits
-    doLayout({ floatingId: data.id, insertIndex: currentIndex });
+    layoutNow({ floatingId: data.id, insertIndex: currentIndex });
 
     let lastX = startX;
 
     const onMove = ev => {
-      const dx = ev.clientX - startX;
-      const dy = ev.clientY - startY;
+      const dx = ev.clientX - startX, dy = ev.clientY - startY;
       const vx = ev.clientX - lastX; lastX = ev.clientX;
-      const rot = Math.max(-4, Math.min(4, vx * 0.3));
+      const rot = Math.max(-3.5, Math.min(3.5, vx * 0.28));
       setPos(el, origX + dx, origY + dy, rot);
 
       const idx = computeInsertIndex(ev.clientY, data.id);
       if (idx !== currentIndex) {
         currentIndex = idx;
-        doLayout({ floatingId: data.id, insertIndex: idx });
+        layoutNow({ floatingId: data.id, insertIndex: idx });
       }
     };
 
@@ -915,7 +912,6 @@ function wireNote(entry) {
       el.style.transition = '';
       setPos(el, origX, origY, 0);
 
-      // commit new sort_order
       const others = [...notes.values()]
         .filter(x => x.data.id !== data.id)
         .sort((a,b) => (a.data.sort_order ?? 0) - (b.data.sort_order ?? 0));
@@ -945,20 +941,27 @@ function wireNote(entry) {
     head.addEventListener('pointercancel', onUp);
   });
 
-  /* ── edit ── */
+  /* ── editing ── */
   body.addEventListener('keydown', e => { if (e.key === 'Escape') body.blur(); });
   body.addEventListener('focus', () => bringFront(entry));
 
-  let lastTyped = 0;
+  let lastPing = 0;
   body.addEventListener('input', () => {
+    layoutAll();
     const now = Date.now();
-    if (now - lastTyped > 300) {
-      lastTyped = now;
-      room?.send({
-        type: 'broadcast', event: 'typing',
-        payload: { id: me.id, name: me.name, color: me.color, noteId: data.id }
-      });
-    }
+    if (now - lastPing < 400) return;
+    lastPing = now;
+    if (!room) return;
+    room.send({
+      type: 'broadcast',
+      event: 'note-typing',
+      payload: {
+        id: me.id,
+        name: me.name,
+        color: me.color,
+        noteId: data.id
+      }
+    });
   });
 
   body.addEventListener('blur', async () => {
@@ -970,7 +973,6 @@ function wireNote(entry) {
     layoutAll();
     const { error } = await sb.from('notes').update({ text }).eq('id', data.id);
     if (error) toast(error.message);
-    else tick(`<b style="color:${HEX[data.color]}">${data.author}</b> edited a note`);
   });
 
   /* ── colour ── */
@@ -991,12 +993,12 @@ function wireNote(entry) {
 
 async function removeNote(id) {
   dropNote(id);
-  blip(300, 0.09, 'sine', 0.035);
+  blip(300, 0.09, 'sine', 0.03);
   const { error } = await sb.from('notes').delete().eq('id', id);
   if (error) toast(error.message);
 }
 
-/* ════════════════ create ════════════════ */
+/* ════════ create ════════ */
 async function addNote() {
   const color = pick(PALETTE);
   const now = Date.now() / 1000;
@@ -1007,11 +1009,10 @@ async function addNote() {
   chord([660, 880, 1100], 0.08);
   upsertNote(data);
   bringFront(notes.get(data.id));
-  tick(`<b style="color:${HEX[color]}">${me.name}</b> dropped a note`);
   setTimeout(() => {
     const body = notes.get(data.id)?.el.querySelector('.body');
     if (body) body.focus();
-  }, 120);
+  }, 140);
 }
 
 $('#add').onclick = () => addNote();
@@ -1050,7 +1051,7 @@ muteBtn.onclick = () => {
 };
 paintMute();
 
-/* ════════════════ broadcasts ════════════════ */
+/* ════════ cursor broadcast ════════ */
 addEventListener('pointermove', e => {
   if (!room) return;
   cursorBuf = { id: me.id, name: me.name, color: me.color, x: e.clientX, y: e.clientY };
@@ -1061,7 +1062,7 @@ addEventListener('pointermove', e => {
   }, 55);
 }, { passive: true });
 
-/* ════════════════ cursors ════════════════ */
+/* ════════ draw cursor ════════ */
 function drawCursor(p) {
   if (p.id === me.id) return;
   let el = cursorEls.get(p.id);
@@ -1069,9 +1070,9 @@ function drawCursor(p) {
     el = document.createElement('div');
     el.className = 'cursor';
     el.innerHTML = `
-      <svg width="19" height="19" viewBox="0 0 24 24">
+      <svg width="18" height="18" viewBox="0 0 24 24">
         <path d="M4 2l6.6 18 2.6-7.6L21 10z" fill="currentColor"
-              stroke="rgba(0,0,0,.45)" stroke-width="1.2" stroke-linejoin="round"/>
+              stroke="rgba(0,0,0,.5)" stroke-width="1.2" stroke-linejoin="round"/>
       </svg>
       <span class="tag"></span>`;
     cursors.appendChild(el);
@@ -1086,14 +1087,13 @@ function drawCursor(p) {
   el._kill = setTimeout(() => { el.remove(); cursorEls.delete(p.id); }, 7000);
 }
 
-/* ════════════════ presence ════════════════ */
-let lastUsers = 0;
+/* ════════ presence ════════ */
 function renderPeople() {
   if (!room) return;
   const users = Object.values(room.presenceState()).flat();
   const box = $('#people');
   box.innerHTML = '';
-  const max = isMobile() ? 3 : 6;
+  const max = isMobile() ? 3 : 5;
 
   users.slice(0, max).forEach(u => {
     const d = document.createElement('div');
@@ -1109,16 +1109,12 @@ function renderPeople() {
     d.textContent = '+' + (users.length - max);
     box.appendChild(d);
   }
-  if ($('#status').classList.contains('live')) $('#statusText').textContent = users.length + ' here';
-
-  if (users.length > lastUsers && lastUsers > 0) {
-    const newest = users.find(u => u.id !== me.id);
-    if (newest) tick(`<b style="color:${newest.color}">${newest.name}</b> joined`);
-  }
-  lastUsers = users.length;
+  $('#metaLive').innerHTML = users.length === 1
+    ? `you are <b>${me.name}</b>`
+    : `<b>${users.length}</b> people here`;
 }
 
-/* ════════════════ boot ════════════════ */
+/* ════════ boot ════════ */
 async function boot() {
   const url = SUPABASE_URL.replace(/\/+$/,'').replace(/\/rest\/v1$/,'');
   sb = createClient(url, SUPABASE_KEY, { realtime: { params: { eventsPerSecond: 25 } } });
@@ -1135,7 +1131,7 @@ async function boot() {
   updateEmpty();
   layoutAll();
 
-  /* rows realtime */
+  /* ── postgres realtime ── */
   sb.channel('nebula-db')
     .on('postgres_changes', { event:'*', schema:'public', table:'notes' }, payload => {
       if (payload.eventType === 'DELETE') dropNote(payload.old.id);
@@ -1143,24 +1139,29 @@ async function boot() {
     })
     .subscribe();
 
-  /* presence + broadcast */
+  /* ── presence + broadcast ── */
   room = sb.channel('nebula-room', { config: { presence: { key: me.id } } });
   room
-    .on('presence', { event:'sync' }, renderPeople)
+    .on('presence', { sync: () => renderPeople() })
     .on('broadcast', { event:'cursor' }, ({ payload }) => drawCursor(payload))
-    .on('broadcast', { event:'typing' }, ({ payload }) => markTyping(payload))
+    .on('broadcast', { event:'note-typing' }, ({ payload }) => {
+      // ignore own typing echoes
+      if (payload.id === me.id) return;
+      // only accept if we have that note locally
+      if (!notes.has(payload.noteId)) return;
+      markTyping(payload);
+    })
     .subscribe(async status => {
       setStatus(status);
       if (status === 'SUBSCRIBED') {
-        await room.track({ id: me.id, name: me.name, color: me.color, at: Date.now() });
+        await room.track({ id: me.id, name: me.name, color: me.color });
         renderPeople();
-        tick(`you are <b style="color:${me.color}">${me.name}</b>`);
       }
     });
 
   addEventListener('beforeunload', () => room?.untrack());
 
-  /* resize → re-layout */
+  /* ── resize ── */
   let rzT;
   addEventListener('resize', () => {
     closePicker();
