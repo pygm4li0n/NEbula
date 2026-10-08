@@ -17,53 +17,53 @@
   button{font-family:inherit;touch-action:manipulation}
   input{font-family:inherit}
 
-  /* ───── canvas ───── */
-  #canvas{
-    position:fixed; inset:0; overflow:hidden;
-    background:
-      radial-gradient(1200px 800px at 15% -10%, rgba(140,90,255,.22), transparent 60%),
-      radial-gradient(1000px 700px at 90% 110%, rgba(0,210,255,.16), transparent 60%),
-      radial-gradient(800px 600px at 50% 50%, rgba(255,90,180,.08), transparent 70%),
-      #06060c;
-  }
-  #canvas::before{
-    content:""; position:absolute; inset:-2px; pointer-events:none;
-    background-image:
-      linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
-    background-size:46px 46px;
-    -webkit-mask-image:radial-gradient(circle at 50% 42%, #000 35%, transparent 88%);
-    mask-image:radial-gradient(circle at 50% 42%, #000 35%, transparent 88%);
-  }
+  /* ═══ background ═══ */
   #aurora{
-    position:fixed; inset:-20%; pointer-events:none; z-index:0; opacity:.5;
+    position:fixed; inset:-20%; pointer-events:none; z-index:0; opacity:.55;
     background:
       radial-gradient(600px 300px at 20% 30%, rgba(140,90,255,.28), transparent 60%),
       radial-gradient(700px 400px at 75% 65%, rgba(0,210,255,.20), transparent 60%),
       radial-gradient(500px 250px at 50% 85%, rgba(255,90,180,.18), transparent 60%);
     filter:blur(70px);
-    animation:drift 24s ease-in-out infinite alternate;
+    animation:drift 26s ease-in-out infinite alternate;
   }
   @keyframes drift{
-    0%  {transform:translate3d(-2%, -2%,0) rotate(0deg)}
-    100%{transform:translate3d( 2%,  3%,0) rotate(6deg)}
+    0%  {transform:translate3d(-2%,-2%,0) rotate(0)}
+    100%{transform:translate3d(2%,3%,0) rotate(6deg)}
+  }
+  #grid{
+    position:fixed; inset:0; pointer-events:none; z-index:1;
+    background-image:
+      linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+    background-size:46px 46px;
+    -webkit-mask-image:radial-gradient(circle at 50% 40%, #000 30%, transparent 85%);
+    mask-image:radial-gradient(circle at 50% 40%, #000 30%, transparent 85%);
   }
 
-  /* ───── top bar ───── */
+  /* ═══ wall ═══ */
+  #wall{
+    position:fixed; inset:0; z-index:2;
+    overflow-y:auto; overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:thin;
+    scrollbar-color:rgba(255,255,255,.12) transparent;
+  }
+  #wall::-webkit-scrollbar{width:8px}
+  #wall::-webkit-scrollbar-thumb{background:rgba(255,255,255,.12); border-radius:9px}
+  #wall::-webkit-scrollbar-track{background:transparent}
+
+  /* ═══ top bar ═══ */
   #bar{
     position:fixed; top:0; left:0; right:0;
     height:60px; padding:0 14px;
     z-index:9000; display:flex; align-items:center; gap:12px;
-    pointer-events:none;
-    background:linear-gradient(180deg, rgba(6,6,12,.94), rgba(6,6,12,.35) 70%, transparent);
-    -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+    background:linear-gradient(180deg, rgba(6,6,12,.94), rgba(6,6,12,.4) 70%, transparent);
+    -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
     padding-top:env(safe-area-inset-top);
+    height:calc(60px + env(safe-area-inset-top));
   }
-  #bar > *{pointer-events:auto}
-  .brand{
-    display:flex; align-items:center; gap:9px;
-    font-weight:800; letter-spacing:.24em; font-size:13px; flex-shrink:0;
-  }
+  .brand{display:flex; align-items:center; gap:9px; font-weight:800; letter-spacing:.24em; font-size:13px; flex-shrink:0}
   .orb{
     width:13px; height:13px; border-radius:50%;
     background:radial-gradient(circle at 32% 30%, #fff, #8b5cff 45%, #4dd4ff);
@@ -76,17 +76,13 @@
     flex:1; min-width:0;
     display:flex; align-items:center; justify-content:center; gap:6px;
     font-size:12.5px; font-weight:600; color:#a9a9c6;
-    letter-spacing:.02em; white-space:nowrap; overflow:hidden;
-    text-overflow:ellipsis; opacity:0; transform:translateY(-4px);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    opacity:0; transform:translateY(-4px);
     transition:opacity .3s, transform .3s;
     pointer-events:none;
   }
   #ticker.show{opacity:1; transform:translateY(0)}
-  #ticker .dot{
-    width:5px; height:5px; border-radius:50%;
-    background:#8b5cff; box-shadow:0 0 8px #8b5cff; flex-shrink:0;
-  }
-  #ticker .dot.pulse{animation:pulse 1s ease-in-out infinite}
+  #ticker .dot{width:5px; height:5px; border-radius:50%; background:#8b5cff; box-shadow:0 0 8px #8b5cff; flex-shrink:0}
 
   .right{display:flex; align-items:center; gap:8px; flex-shrink:0}
   .people{display:flex; align-items:center}
@@ -106,8 +102,7 @@
     font-size:11px; font-weight:700; color:#8b8ba7;
     letter-spacing:.08em; text-transform:uppercase;
     padding:6px 11px; border-radius:99px;
-    background:rgba(255,255,255,.045);
-    border:1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.08);
   }
   .status i{width:7px; height:7px; border-radius:50%; background:#666; transition:.3s}
   .status.live i{background:#3ce88a; box-shadow:0 0 10px #3ce88a}
@@ -117,7 +112,7 @@
     all:unset; cursor:pointer; font-size:13px; font-weight:700; color:#ececf5;
     padding:9px 14px; border-radius:11px; text-align:center;
     background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1);
-    transition:.16s; white-space:nowrap; touch-action:manipulation;
+    transition:.16s; white-space:nowrap;
   }
   .btn:hover{background:rgba(255,255,255,.12); transform:translateY(-1px)}
   .btn:active{transform:translateY(0) scale(.97)}
@@ -128,52 +123,59 @@
   }
   .btn.icon{padding:9px 11px; font-size:14px; line-height:1}
 
-  /* ───── notes ───── */
+  /* ═══ notes ═══ */
   .note{
     position:absolute; top:0; left:0;
-    width:200px; /* overridden by JS */
-    padding:10px 12px 11px;
-    border-radius:16px; touch-action:none;
-    background:linear-gradient(158deg, var(--c-soft), rgba(9,9,17,.9));
+    padding:11px 13px 12px;
+    border-radius:16px;
+    background:linear-gradient(155deg, var(--c-soft), rgba(9,9,17,.92));
     border:1px solid var(--c-line);
     box-shadow:
       0 14px 36px -18px rgba(0,0,0,.95),
       0 0 30px -14px var(--c),
       inset 0 1px 0 rgba(255,255,255,.06);
-    transition:box-shadow .2s, border-color .2s;
+    transition:
+      transform .38s cubic-bezier(.2,.8,.3,1),
+      box-shadow .22s,
+      border-color .22s,
+      opacity .3s;
     will-change:transform;
     animation:dropIn .42s cubic-bezier(.2,1.4,.35,1) both;
     user-select:none; -webkit-user-select:none;
   }
-  @keyframes dropIn{
-    0%  {opacity:0; transform:translate3d(var(--tx),calc(var(--ty) - 24px),0) scale(.85); filter:blur(8px)}
-    60% {opacity:1; filter:blur(0)}
-    100%{opacity:1; transform:translate3d(var(--tx),var(--ty),0) scale(1); filter:blur(0)}
-  }
+  @keyframes dropIn{from{opacity:0; filter:blur(10px)}to{opacity:1; filter:blur(0)}}
   .note:hover{
     box-shadow:
-      0 20px 46px -18px rgba(0,0,0,1),
-      0 0 44px -10px var(--c),
+      0 22px 48px -20px rgba(0,0,0,1),
+      0 0 46px -10px var(--c),
       inset 0 1px 0 rgba(255,255,255,.08);
     border-color:var(--c);
   }
   .note.dragging{
-    box-shadow:
-      0 40px 80px -24px rgba(0,0,0,1),
-      0 0 58px -10px var(--c),
-      inset 0 1px 0 rgba(255,255,255,.1);
-    border-color:var(--c);
     transition:none;
+    box-shadow:
+      0 42px 90px -26px rgba(0,0,0,1),
+      0 0 60px -8px var(--c),
+      inset 0 1px 0 rgba(255,255,255,.12);
+    border-color:var(--c);
+    z-index:5000;
   }
-  .note.gone{animation:vanish .26s ease forwards}
-  @keyframes vanish{to{opacity:0; filter:blur(10px); transform:translate3d(var(--tx),var(--ty),0) scale(.9)}}
+  .note.gone{animation:vanish .28s ease forwards}
+  @keyframes vanish{
+    to{opacity:0; filter:blur(10px); transform:scale(.9) translate(var(--tx),var(--ty))}
+  }
+  .note.fresh{animation:popIn .55s cubic-bezier(.2,1.5,.4,1) both}
+  @keyframes popIn{
+    0%  {opacity:0; transform:translate3d(var(--tx),var(--ty),0) scale(.7); filter:blur(10px)}
+    60% {opacity:1; filter:blur(0)}
+    100%{opacity:1; transform:translate3d(var(--tx),var(--ty),0) scale(1)}
+  }
 
   .note-head{
     display:flex; align-items:center; gap:8px; height:24px;
     cursor:grab; touch-action:none;
   }
   .note.dragging .note-head{cursor:grabbing}
-
   .author{display:flex; align-items:center; gap:6px; flex:1; min-width:0}
   .author .dot{
     width:8px; height:8px; border-radius:50%;
@@ -184,26 +186,12 @@
     color:var(--c); opacity:.95;
     overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
   }
-  .typing-dots{
-    display:inline-flex; gap:3px; align-items:center; flex-shrink:0;
-  }
-  .typing-dots i{
-    width:5px; height:5px; border-radius:50%;
-    animation:typebob 1s ease-in-out infinite;
-  }
-  .typing-dots i:nth-child(2){animation-delay:.14s}
-  .typing-dots i:nth-child(3){animation-delay:.28s}
-  @keyframes typebob{
-    0%,60%,100%{transform:translateY(0); opacity:.55}
-    30%        {transform:translateY(-4px); opacity:1}
-  }
-
   .acts{display:flex; gap:1px; opacity:0; transition:opacity .16s; flex-shrink:0}
   .note:hover .acts, .note.dragging .acts{opacity:1}
   .acts button{
     all:unset; width:22px; height:22px; display:grid; place-items:center;
     cursor:pointer; border-radius:6px; font-size:11px;
-    color:#d3d3e6; transition:.14s; touch-action:manipulation;
+    color:#d3d3e6; transition:.14s;
   }
   .acts button:hover{background:rgba(255,255,255,.16); color:#fff}
   .acts .a-del:hover{background:rgba(255,80,110,.3); color:#ff8098}
@@ -213,18 +201,44 @@
     font-size:14px; line-height:1.5; color:#f5f5fd;
     white-space:pre-wrap; word-break:break-word;
     outline:none; cursor:text;
-    max-height:340px; overflow:auto;
+    min-height:26px; max-height:300px; overflow:auto;
     user-select:text; -webkit-user-select:text;
     scrollbar-width:thin; scrollbar-color:rgba(255,255,255,.18) transparent;
   }
   .body::-webkit-scrollbar{width:5px}
   .body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18); border-radius:9px}
-  .body:empty::before{content:"type…"; color:rgba(255,255,255,.22); pointer-events:none}
+  .body:empty::before{content:"type something…"; color:rgba(255,255,255,.22); pointer-events:none}
 
-  /* ───── reactions ───── */
+  /* typing strip INSIDE note */
+  .typing-strip{
+    display:none;
+    align-items:center; gap:6px;
+    margin-top:8px; padding:5px 9px;
+    border-radius:9px;
+    background:rgba(255,255,255,.045);
+    border:1px solid rgba(255,255,255,.07);
+    font-size:11px; font-weight:600;
+    animation:popIn .3s ease both;
+  }
+  .typing-strip.on{display:flex}
+  .typing-strip .who{color:#c9c9e0}
+  .typing-strip .who b{font-weight:800}
+  .typing-dots{display:inline-flex; gap:3px; align-items:center}
+  .typing-dots i{
+    width:5px; height:5px; border-radius:50%;
+    animation:typebob 1.05s ease-in-out infinite;
+  }
+  .typing-dots i:nth-child(2){animation-delay:.15s}
+  .typing-dots i:nth-child(3){animation-delay:.3s}
+  @keyframes typebob{
+    0%,60%,100%{transform:translateY(0); opacity:.5}
+    30%        {transform:translateY(-4px); opacity:1}
+  }
+
+  /* reactions */
   .react-bar{
-    display:flex; flex-wrap:wrap; gap:5px; margin-top:10px;
-    min-height:24px; align-items:center;
+    display:flex; flex-wrap:wrap; gap:5px;
+    margin-top:10px; min-height:24px; align-items:center;
   }
   .react-chip{
     all:unset; cursor:pointer;
@@ -232,9 +246,8 @@
     padding:3px 9px 4px; border-radius:99px;
     background:rgba(255,255,255,.07);
     border:1px solid rgba(255,255,255,.1);
-    transition:.15s; line-height:1.1; font-size:13px;
+    transition:.15s; font-size:13px;
     animation:chipIn .3s cubic-bezier(.2,1.5,.4,1);
-    touch-action:manipulation;
   }
   @keyframes chipIn{from{transform:scale(0); opacity:0}to{transform:scale(1); opacity:1}}
   .react-chip:hover{background:rgba(255,255,255,.14); transform:translateY(-1px)}
@@ -252,39 +265,33 @@
     color:#8b8ba7;
     background:rgba(255,255,255,.05);
     border:1px dashed rgba(255,255,255,.18);
-    transition:.15s; touch-action:manipulation;
+    transition:.15s;
   }
   .react-add:hover{
     color:#fff; background:rgba(255,255,255,.13);
     border-color:var(--c); border-style:solid;
   }
 
-  /* ───── emoji picker ───── */
+  /* picker */
   .emoji-picker{
     position:fixed; z-index:9700;
     display:flex; flex-wrap:wrap; gap:2px; padding:7px;
-    border-radius:16px; max-width:min(320px, 92vw);
+    border-radius:16px; max-width:min(340px, 92vw);
     background:rgba(20,20,32,.97);
     border:1px solid rgba(255,255,255,.12);
     box-shadow:0 24px 60px -14px #000;
     -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
     animation:popIn .18s cubic-bezier(.2,1.5,.4,1);
-    touch-action:manipulation;
-  }
-  @keyframes popIn{
-    from{transform:translateY(6px) scale(.94); opacity:0}
-    to  {transform:translateY(0) scale(1); opacity:1}
   }
   .emoji-picker button{
     all:unset; cursor:pointer;
     width:38px; height:38px; display:grid; place-items:center;
     border-radius:10px; font-size:21px; transition:.12s;
-    touch-action:manipulation;
   }
   .emoji-picker button:hover{background:rgba(255,255,255,.14); transform:scale(1.14)}
-  .emoji-picker button:active{transform:scale(.92)}
+  .emoji-picker button:active{transform:scale(.9)}
 
-  /* ───── cursors ───── */
+  /* cursors */
   #cursors{position:fixed; inset:0; pointer-events:none; z-index:9500}
   .cursor{
     position:absolute; top:0; left:0; will-change:transform;
@@ -299,8 +306,8 @@
     white-space:nowrap; letter-spacing:.03em;
   }
 
-  /* ───── emoji burst ───── */
-  .emoji{
+  /* emoji float */
+  .emoji-fly{
     position:fixed; font-size:26px; pointer-events:none; z-index:9600;
     animation:floatUp 1.6s cubic-bezier(.2,.8,.3,1) forwards;
   }
@@ -319,21 +326,21 @@
     100%{transform:translate(calc(-50% + var(--bx)), calc(-50% + var(--by))) scale(0); opacity:0}
   }
 
-  /* ───── empty state ───── */
+  /* empty state */
   #hint{
     position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
     text-align:center; pointer-events:none; user-select:none;
-    transition:opacity .5s; width:min(320px, 90vw);
+    transition:opacity .5s; width:min(340px, 90vw); z-index:3;
   }
   #hint.hide{opacity:0}
   #hint h2{
-    margin:0 0 10px; font-size:24px; letter-spacing:.04em; font-weight:800;
+    margin:0 0 10px; font-size:26px; letter-spacing:.04em; font-weight:800;
     background:linear-gradient(120deg,#8b5cff,#4dd4ff,#ff6b9d);
     -webkit-background-clip:text; background-clip:text; color:transparent;
     animation:hue 6s linear infinite;
   }
   @keyframes hue{to{filter:hue-rotate(360deg)}}
-  #hint p{margin:0; font-size:13px; color:#6a6a86; line-height:1.6}
+  #hint p{margin:0; font-size:13px; color:#6a6a86; line-height:1.7}
   #hint kbd{
     font-family:inherit; font-size:11px; font-weight:700;
     background:rgba(255,255,255,.08);
@@ -341,7 +348,7 @@
     border-radius:5px; padding:1px 6px; margin:0 2px; color:#c9c9e0;
   }
 
-  /* ───── toasts ───── */
+  /* toasts */
   #toasts{
     position:fixed; left:50%; bottom:26px; transform:translateX(-50%);
     z-index:9800; display:flex; flex-direction:column; gap:8px;
@@ -354,17 +361,12 @@
     background:rgba(30,20,45,.94);
     border:1px solid rgba(255,120,150,.35);
     box-shadow:0 14px 40px -12px #000;
-    animation:popIn .25s ease both;
-    text-align:center;
+    animation:popIn .25s ease both; text-align:center;
   }
 
-  /* ══════════════════════════════════════════
-     MOBILE — clean, tappable, thumb-friendly
-     ══════════════════════════════════════════ */
-  @media (max-width: 640px) {
-    #bar{
-      height:56px; padding:0 10px; gap:8px;
-    }
+  /* ═══ mobile ═══ */
+  @media (max-width: 640px){
+    #bar{height:calc(56px + env(safe-area-inset-top)); padding:0 10px; gap:8px}
     .brand{font-size:11px; letter-spacing:.16em; gap:7px}
     .brand .orb{width:11px; height:11px}
     #ticker{font-size:11.5px}
@@ -373,41 +375,31 @@
     .btn{padding:8px 12px; font-size:12.5px; border-radius:10px}
     .btn.icon{padding:8px 10px}
     .avatar{width:26px; height:26px; font-size:10px}
-
-    /* notes smaller + always-interactive */
-    .note{padding:9px 11px 10px; border-radius:14px}
+    .note{padding:10px 12px 11px; border-radius:14px}
     .note-head{height:26px}
-    .body{font-size:15px; max-height:44vh; margin-top:4px}
-    .acts{opacity:1} /* no hover on touch */
+    .body{font-size:15px; max-height:38vh}
+    .acts{opacity:1}
     .acts button{width:26px; height:26px; font-size:13px}
-
-    .react-bar{gap:6px; margin-top:9px}
     .react-chip{padding:4px 10px 5px; font-size:14px}
-    .react-chip b{font-size:12px}
     .react-add{width:30px; height:30px; font-size:17px}
-
-    .emoji-picker{padding:8px; gap:3px}
     .emoji-picker button{width:44px; height:44px; font-size:24px}
-
     #hint h2{font-size:20px}
     #hint p{font-size:12px}
   }
-
-  /* very short phones */
-  @media (max-height: 500px) {
-    #hint{display:none}
-  }
+  @media (max-height: 500px){ #hint{display:none} }
 </style>
 </head>
 <body>
 
 <div id="aurora"></div>
-<div id="canvas">
+<div id="grid"></div>
+
+<div id="wall">
   <div id="hint">
     <h2>the wall is waiting</h2>
     <p>
       <kbd>N</kbd> · or double-tap · or <strong>+ Note</strong><br>
-      drag the top of a note · tap <strong>+</strong> to react
+      drag the top of a note to reorder
     </p>
   </div>
 </div>
@@ -416,7 +408,7 @@
 
 <header id="bar">
   <div class="brand"><span class="orb"></span> NEBULA</div>
-  <div id="ticker"><span class="dot" id="tickerDot"></span><span id="tickerText"></span></div>
+  <div id="ticker"><span class="dot"></span><span id="tickerText"></span></div>
   <div class="right">
     <div class="people" id="people"></div>
     <span class="status" id="status"><i></i><span id="statusText">connecting</span></span>
@@ -430,11 +422,11 @@
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-/* ══════════════════════ config ══════════════════════ */
+/* ════════════════ config ════════════════ */
 const SUPABASE_URL = 'https://piexelytvvfsoeqhlokb.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_neiQC042cfc6Io2r8Cf6hw_WoecdytJ';
 
-/* ══════════════════════ helpers ══════════════════════ */
+/* ════════════════ helpers ════════════════ */
 const $    = s => document.querySelector(s);
 const pick = a => a[Math.floor(Math.random() * a.length)];
 const uid  = () => crypto.randomUUID?.() ?? 'id-' + Math.random().toString(36).slice(2) + Date.now();
@@ -454,7 +446,7 @@ const NAMES = ['Nova','Comet','Pulsar','Quasar','Orion','Vega','Lyra','Atlas',
                'Phoenix','Hydra','Indigo','Sol','Luna'];
 const REACTS = ['✨','🔥','💜','🚀','🎯','💡','😂','👍','❤️','🎉'];
 
-/* ══════════════════════ identity ══════════════════════ */
+/* ════════════════ identity ════════════════ */
 let me;
 try { me = JSON.parse(sessionStorage.getItem('nebula.me')); } catch {}
 if (!me) {
@@ -462,16 +454,18 @@ if (!me) {
   sessionStorage.setItem('nebula.me', JSON.stringify(me));
 }
 
-/* ══════════════════════ state ══════════════════════ */
-const canvas  = $('#canvas');
+/* ════════════════ state ════════════════ */
+const wall    = $('#wall');
 const cursors = $('#cursors');
 const notes   = new Map();
 let sb, room, zTop = 10;
-let moveBuf=null, moveTimer=null, cursorBuf=null, cursorTimer=null;
+let moveTimer=null, cursorTimer=null, cursorBuf=null;
 let soundOn = localStorage.getItem('nebula.mute') !== '1';
-const typingUsers = new Map(); // userId -> { name, color, noteId, timer }
+const typingUsers = new Map();
+const cursorEls = new Map();
+let layoutRaf = null;
 
-/* ══════════════════════ sound ══════════════════════ */
+/* ════════════════ sound ════════════════ */
 let actx;
 function blip(freq = 880, dur = 0.07, type = 'sine', gain = 0.045) {
   if (!soundOn) return;
@@ -487,7 +481,7 @@ function blip(freq = 880, dur = 0.07, type = 'sine', gain = 0.045) {
 }
 const chord = (f, d=0.14) => f.forEach((x,i) => setTimeout(() => blip(x, d), i*22));
 
-/* ══════════════════════ toast + ticker ══════════════════════ */
+/* ════════════════ toast + ticker ════════════════ */
 function toast(msg) {
   const el = document.createElement('div');
   el.className = 'toast'; el.textContent = msg;
@@ -500,16 +494,15 @@ function toast(msg) {
   }, 4200);
 }
 let tickTimer;
-function tick(html, pulsing = false) {
+function tick(html) {
   $('#tickerText').innerHTML = html;
   const el = $('#ticker');
-  $('#tickerDot').classList.toggle('pulse', pulsing);
   el.classList.add('show');
   clearTimeout(tickTimer);
   tickTimer = setTimeout(() => el.classList.remove('show'), 3600);
 }
 
-/* ══════════════════════ status ══════════════════════ */
+/* ════════════════ status ════════════════ */
 function setStatus(state) {
   const el = $('#status'), txt = $('#statusText');
   el.classList.remove('live','dead');
@@ -518,26 +511,93 @@ function setStatus(state) {
   else { txt.textContent = 'connecting'; }
 }
 
-/* ══════════════════════ sizing ══════════════════════ */
-function autoSize(entry) {
-  const text = (entry.data.text || '').trim();
-  const len  = text.length;
-  const longest = text ? Math.max(...text.split('\n').map(l => l.length)) : 0;
-
-  const MIN = isMobile() ? 148 : 170;
-  const MAX = isMobile() ? Math.min(320, innerWidth - 40) : 380;
-
-  let w = MIN;
-  if (len > 0) {
-    const byTotal = 100 + Math.sqrt(len) * 30;
-    const byLine  = Math.min(longest, 42) * 8.4 + 60;
-    w = Math.max(byTotal, byLine);
+/* ════════════════ layout engine ════════════════ */
+function computeCols() {
+  const gap = 16;
+  const sideGap = 16;
+  const availW = innerWidth - sideGap * 2;
+  const minColW = isMobile() ? 260 : 250;
+  const maxColW = isMobile() ? 420 : 320;
+  let cols = Math.max(1, Math.min(4, Math.floor((availW + gap) / (minColW + gap))));
+  let colW = Math.floor((availW - gap * (cols - 1)) / cols);
+  while (cols > 1 && colW > maxColW) {
+    cols--;
+    colW = Math.floor((availW - gap * (cols - 1)) / cols);
   }
-  w = Math.min(MAX, Math.max(MIN, Math.round(w)));
-  entry.el.style.width = w + 'px';
+  const totalW = cols * colW + (cols - 1) * gap;
+  const startX = Math.max(sideGap, (innerWidth - totalW) / 2);
+  const topY = ($('#bar').offsetHeight || 60) + 16;
+  return { gap, cols, colW, startX, topY };
 }
 
-/* ══════════════════════ note render ══════════════════════ */
+let lastLayout = { maxY: 0 };
+function layoutAll(opts = {}) {
+  if (layoutRaf) cancelAnimationFrame(layoutRaf);
+  layoutRaf = requestAnimationFrame(() => {
+    layoutRaf = null;
+    doLayout(opts);
+  });
+}
+
+function doLayout(opts = {}) {
+  const { floatingId = null, insertIndex = -1 } = opts;
+  const L = computeCols();
+
+  const sorted = [...notes.values()]
+    .filter(e => e.data.id !== floatingId)
+    .sort((a, b) => (a.data.sort_order ?? 0) - (b.data.sort_order ?? 0));
+
+  let items = sorted;
+  if (floatingId && insertIndex >= 0) {
+    const dragged = notes.get(floatingId);
+    const ph = dragged ? dragged.el.offsetHeight : 0;
+    items = [...sorted.slice(0, insertIndex), { _phantom: true, h: ph }, ...sorted.slice(insertIndex)];
+  }
+
+  const colY = new Array(L.cols).fill(L.topY);
+  let maxBottom = 0;
+
+  for (const item of items) {
+    let c = 0;
+    for (let i = 1; i < L.cols; i++) if (colY[i] < colY[c]) c = i;
+    const x = L.startX + c * (L.colW + L.gap);
+    const y = colY[c];
+
+    if (item._phantom) { colY[c] = y + item.h + L.gap; continue; }
+
+    const entry = item;
+    if (entry.el.style.width !== L.colW + 'px') entry.el.style.width = L.colW + 'px';
+    const h = entry.el.offsetHeight;
+
+    entry._layoutX = x;
+    entry._layoutY = y;
+    entry._layoutW = L.colW;
+
+    if (!entry.el.classList.contains('dragging')) {
+      setPos(entry.el, x, y);
+    }
+
+    colY[c] = y + h + L.gap;
+    maxBottom = Math.max(maxBottom, y + h);
+  }
+
+  lastLayout.maxY = maxBottom;
+  wall.style.minHeight = Math.max(innerHeight, maxBottom + 80) + 'px';
+}
+
+function computeInsertIndex(clientY, floatingId) {
+  const sorted = [...notes.values()]
+    .filter(e => e.data.id !== floatingId)
+    .sort((a, b) => (a.data.sort_order ?? 0) - (b.data.sort_order ?? 0));
+  for (let i = 0; i < sorted.length; i++) {
+    const rect = sorted[i].el.getBoundingClientRect();
+    const cy = rect.top + rect.height / 2;
+    if (clientY < cy) return i;
+  }
+  return sorted.length;
+}
+
+/* ════════════════ note render ════════════════ */
 function setPos(el, x, y, rot = 0) {
   el.style.setProperty('--tx', x + 'px');
   el.style.setProperty('--ty', y + 'px');
@@ -551,17 +611,14 @@ function renderNote(entry) {
   el.style.setProperty('--c-soft', hexA(hex, .13));
   el.style.setProperty('--c-line', hexA(hex, .42));
 
-  if (!el.classList.contains('dragging')) setPos(el, data.x, data.y);
-
   const body = el.querySelector('.body');
   const text = data.text || '';
   if (document.activeElement !== body && body.innerText !== text) body.innerText = text;
 
   el.querySelector('.who').textContent = data.author || '?';
 
-  autoSize(entry);
   renderReactions(entry);
-  renderTypingOnNote(entry);
+  renderTypingStrip(entry);
 }
 
 function createNoteEl(data) {
@@ -570,17 +627,14 @@ function createNoteEl(data) {
   el.dataset.id = data.id;
   el.innerHTML = `
     <header class="note-head">
-      <div class="author">
-        <span class="dot"></span>
-        <span class="who"></span>
-        <span class="typing-dots"></span>
-      </div>
+      <div class="author"><span class="dot"></span><span class="who"></span></div>
       <div class="acts">
         <button class="a-color" title="Recolour">◐</button>
         <button class="a-del"   title="Delete">✕</button>
       </div>
     </header>
     <div class="body" contenteditable="true" spellcheck="false"></div>
+    <div class="typing-strip"></div>
     <footer class="react-bar"></footer>
   `;
   return el;
@@ -588,39 +642,48 @@ function createNoteEl(data) {
 
 function upsertNote(row) {
   let entry = notes.get(row.id);
+  let isNew = false;
   if (!entry) {
     const el = createNoteEl(row);
-    canvas.appendChild(el);
+    wall.appendChild(el);
     entry = { el, data: { ...row } };
     notes.set(row.id, entry);
     wireNote(entry);
+    isNew = true;
     updateEmpty();
   } else {
     Object.assign(entry.data, row);
   }
   renderNote(entry);
+  if (isNew) {
+    entry.el.classList.add('fresh');
+    setTimeout(() => entry.el.classList.remove('fresh'), 600);
+  }
+  layoutAll();
 }
 
 function dropNote(id) {
   const entry = notes.get(id);
   if (!entry) return;
   notes.delete(id);
-  // clear typing for that note
   typingUsers.forEach((v, k) => { if (v.noteId === id) { clearTimeout(v.timer); typingUsers.delete(k); } });
   const el = entry.el;
+  const rect = el.getBoundingClientRect();
+  el.style.setProperty('--tx', rect.left + 'px');
+  el.style.setProperty('--ty', rect.top + 'px');
   el.style.pointerEvents = 'none';
   el.classList.add('gone');
-  setTimeout(() => { el.remove(); updateEmpty(); }, 260);
+  setTimeout(() => { el.remove(); updateEmpty(); }, 280);
   updateEmpty();
+  layoutAll();
 }
 
 const updateEmpty = () => $('#hint').classList.toggle('hide', notes.size > 0);
 const bringFront  = entry => entry.el.style.zIndex = ++zTop;
 
-/* ══════════════════════ reactions ══════════════════════ */
+/* ════════════════ reactions ════════════════ */
 function renderReactions(entry) {
   const bar = entry.el.querySelector('.react-bar');
-  // if the picker for THIS note is open, don't blow it away mid-interaction
   const openFor = document.querySelector('.emoji-picker');
   if (openFor && openFor.dataset.noteId === entry.data.id) return;
 
@@ -642,7 +705,6 @@ function renderReactions(entry) {
   add.type = 'button';
   add.textContent = '+';
   add.title = 'Add reaction';
-  add.setAttribute('aria-label', 'Add reaction');
   add.onclick = e => { e.stopPropagation(); openPicker(entry, add); };
   bar.appendChild(add);
 }
@@ -656,7 +718,6 @@ async function toggleReaction(noteId, emoji) {
   const i = arr.indexOf(me.id);
   const added = i < 0;
   if (added) arr.push(me.id); else arr.splice(i, 1);
-
   if (arr.length) reactions[emoji] = arr; else delete reactions[emoji];
 
   entry.data.reactions = reactions;
@@ -668,67 +729,86 @@ async function toggleReaction(noteId, emoji) {
   const { error } = await sb.from('notes').update({ reactions }).eq('id', noteId);
   if (error) {
     toast(/reactions/i.test(error.message)
-      ? 'Run the SQL to add the `reactions` column.'
+      ? 'Run the SQL — missing `reactions` column.'
       : error.message);
   }
+  // re-layout (heights may have changed)
+  layoutAll();
 }
 
-/* ══════════════════════ picker ══════════════════════ */
+/* ════════════════ picker — FIXED ════════════════ */
 function openPicker(entry, anchor) {
-  const already = document.querySelector(`.emoji-picker[data-note-id="${entry.data.id}"]`);
-  if (already) { closePicker(); return; }
+  const existing = document.querySelector(`.emoji-picker[data-note-id="${entry.data.id}"]`);
+  if (existing) { closePicker(); return; }
   closePicker();
 
   const picker = document.createElement('div');
   picker.className = 'emoji-picker';
   picker.dataset.noteId = entry.data.id;
 
-  // CRUCIAL: stop pointerdown from bubbling to document → keeps the picker alive
+  // kill pointer events from bubbling to document
   picker.addEventListener('pointerdown', e => e.stopPropagation());
-  picker.addEventListener('click',      e => e.stopPropagation());
 
   REACTS.forEach(em => {
     const b = document.createElement('button');
     b.type = 'button';
     b.textContent = em;
-    b.onclick = ev => {
+    // use pointerdown for instant response, no click delay
+    b.addEventListener('pointerdown', ev => {
       ev.stopPropagation();
+      ev.preventDefault();
       toggleReaction(entry.data.id, em);
       closePicker();
-    };
+    });
     picker.appendChild(b);
   });
 
   document.body.appendChild(picker);
 
-  // position it
+  // position
   const r  = anchor.getBoundingClientRect();
   const pw = picker.offsetWidth  || 260;
   const ph = picker.offsetHeight || 44;
   let left = r.left + r.width / 2 - pw / 2;
   let top  = r.top - ph - 10;
   left = Math.max(8, Math.min(innerWidth  - pw - 8, left));
-  if (top < 64) top = r.bottom + 10;
+  if (top < ($('#bar').offsetHeight || 60) + 6) top = r.bottom + 10;
   if (top + ph > innerHeight - 8) top = innerHeight - ph - 8;
   picker.style.left = left + 'px';
-  picker.style.top  = top + 'px';
+  picker.style.top  = top  + 'px';
 
-  // close on outside tap (added *after* the current event cycle finishes)
+  // close on outside pointerdown — added AFTER current event loop, bubble phase
   setTimeout(() => {
-    document.addEventListener('pointerdown', closePicker, { once: true, capture: true });
+    const closeOnOutside = e => {
+      if (e.target.closest('.emoji-picker')) return;
+      if (e.target.closest('.react-add'))     return;
+      document.removeEventListener('pointerdown', closeOnOutside);
+      closePicker();
+    };
+    document.addEventListener('pointerdown', closeOnOutside);
+    picker._closeHandler = closeOnOutside;
   }, 0);
 }
 function closePicker() {
-  document.querySelectorAll('.emoji-picker').forEach(p => p.remove());
+  document.querySelectorAll('.emoji-picker').forEach(p => {
+    if (p._closeHandler) document.removeEventListener('pointerdown', p._closeHandler);
+    p.remove();
+  });
 }
 
-/* ══════════════════════ bursts ══════════════════════ */
+/* ════════════════ bursts ════════════════ */
 function burst(entry, emoji) {
   const rect = entry.el.getBoundingClientRect();
   const cx = rect.left + rect.width / 2;
   const cy = rect.top + rect.height / 2;
 
-  spawnEmoji(cx, cy, emoji);
+  const fly = document.createElement('div');
+  fly.className = 'emoji-fly';
+  fly.textContent = emoji;
+  fly.style.left = cx + 'px';
+  fly.style.top  = cy + 'px';
+  document.body.appendChild(fly);
+  setTimeout(() => fly.remove(), 1700);
 
   const hex = HEX[entry.data.color] || '#fff';
   for (let i = 0; i < 8; i++) {
@@ -746,40 +826,28 @@ function burst(entry, emoji) {
     setTimeout(() => p.remove(), 780);
   }
 }
-function spawnEmoji(x, y, emoji) {
-  const el = document.createElement('div');
-  el.className = 'emoji';
-  el.textContent = emoji;
-  el.style.left = x + 'px';
-  el.style.top  = y + 'px';
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 1700);
-}
 
-/* ══════════════════════ typing indicators ══════════════════════ */
-function renderTypingOnNote(entry) {
-  const host = entry.el.querySelector('.typing-dots');
+/* ════════════════ typing (inside note) ════════════════ */
+function renderTypingStrip(entry) {
+  const strip = entry.el.querySelector('.typing-strip');
   const users = [...typingUsers.values()].filter(u => u.noteId === entry.data.id && u.id !== me.id);
-  host.innerHTML = '';
-  users.slice(0, 4).forEach(u => {
-    const d = document.createElement('i');
-    d.style.background = u.color;
-    d.style.boxShadow  = `0 0 8px ${u.color}`;
-    host.appendChild(d);
-  });
-}
+  if (!users.length) { strip.classList.remove('on'); strip.innerHTML = ''; return; }
 
-function renderTypingAll() {
-  notes.forEach(renderTypingOnNote);
-  const others = [...typingUsers.values()].filter(u => u.id !== me.id);
-  if (others.length) {
-    const names = [...new Set(others.map(u => u.name))].slice(0, 3);
-    const label = names.length === 1
-      ? `<b style="color:${others[0].color}">${names[0]}</b> is typing…`
-      : `<b style="color:${others[0].color}">${names[0]}</b> + ${others.length - 1} typing…`;
-    tick(label, true);
-  }
+  const names = users.slice(0, 3).map(u => `<b style="color:${u.color}">${u.name}</b>`).join(', ');
+  const more = users.length > 3 ? ` +${users.length - 3}` : '';
+  const verb = users.length === 1 ? 'is' : 'are';
+
+  strip.classList.add('on');
+  strip.innerHTML = `
+    <span class="typing-dots">
+      <i style="background:${users[0].color}; box-shadow:0 0 8px ${users[0].color}"></i>
+      <i style="background:${users[0].color}; box-shadow:0 0 8px ${users[0].color}"></i>
+      <i style="background:${users[0].color}; box-shadow:0 0 8px ${users[0].color}"></i>
+    </span>
+    <span class="who">${names}${more} ${verb} typing…</span>
+  `;
 }
+function renderTypingAll() { notes.forEach(renderTypingStrip); }
 
 function markTyping(payload) {
   const existing = typingUsers.get(payload.id);
@@ -787,12 +855,14 @@ function markTyping(payload) {
   const timer = setTimeout(() => {
     typingUsers.delete(payload.id);
     renderTypingAll();
+    layoutAll();
   }, 2200);
   typingUsers.set(payload.id, { ...payload, timer });
   renderTypingAll();
+  layoutAll();
 }
 
-/* ══════════════════════ wire note ══════════════════════ */
+/* ════════════════ wire note ════════════════ */
 function wireNote(entry) {
   const { el, data } = entry;
   const head = el.querySelector('.note-head');
@@ -800,53 +870,90 @@ function wireNote(entry) {
 
   el.addEventListener('pointerdown', () => bringFront(entry), true);
 
-  /* ── drag ── */
+  /* ── drag → reorder ── */
   head.addEventListener('pointerdown', e => {
     if (e.target.closest('button')) return;
     if (document.activeElement !== body) e.preventDefault();
     bringFront(entry);
-    el.classList.add('dragging');
+
     try { head.setPointerCapture(e.pointerId); } catch {}
 
-    const sx = e.clientX, sy = e.clientY;
-    const ox = data.x, oy = data.y;
-    let moved = false, lastX = sx;
+    const startX = e.clientX, startY = e.clientY;
+    const origX = entry._layoutX ?? 0, origY = entry._layoutY ?? 0;
+
+    // current index from sort_order
+    const currentSorted = [...notes.values()].sort((a,b) => (a.data.sort_order ?? 0) - (b.data.sort_order ?? 0));
+    let currentIndex = currentSorted.findIndex(x => x.data.id === data.id);
+
+    el.classList.add('dragging');
+    el.style.transition = 'none';
+
+    // re-layout with phantom gap where it currently sits
+    doLayout({ floatingId: data.id, insertIndex: currentIndex });
+
+    let lastX = startX;
 
     const onMove = ev => {
-      const dx = ev.clientX - sx, dy = ev.clientY - sy;
-      if (!moved && Math.abs(dx) + Math.abs(dy) > 3) moved = true;
-      data.x = ox + dx; data.y = oy + dy;
+      const dx = ev.clientX - startX;
+      const dy = ev.clientY - startY;
       const vx = ev.clientX - lastX; lastX = ev.clientX;
-      const rot = Math.max(-5, Math.min(5, vx * 0.35));
-      setPos(el, data.x, data.y, rot);
-      queueMove(data.id, data.x, data.y);
+      const rot = Math.max(-4, Math.min(4, vx * 0.3));
+      setPos(el, origX + dx, origY + dy, rot);
+
+      const idx = computeInsertIndex(ev.clientY, data.id);
+      if (idx !== currentIndex) {
+        currentIndex = idx;
+        doLayout({ floatingId: data.id, insertIndex: idx });
+      }
     };
+
     const onUp = async () => {
       head.removeEventListener('pointermove', onMove);
       head.removeEventListener('pointerup', onUp);
       head.removeEventListener('pointercancel', onUp);
       el.classList.remove('dragging');
-      setPos(el, data.x, data.y, 0);
-      if (!moved) return;
-      const { error } = await sb.from('notes').update({ x: data.x, y: data.y }).eq('id', data.id);
+      el.style.transition = '';
+      setPos(el, origX, origY, 0);
+
+      // commit new sort_order
+      const others = [...notes.values()]
+        .filter(x => x.data.id !== data.id)
+        .sort((a,b) => (a.data.sort_order ?? 0) - (b.data.sort_order ?? 0));
+
+      let newOrder;
+      if (currentIndex >= others.length) {
+        const last = others[others.length - 1];
+        newOrder = last ? (last.data.sort_order ?? 0) + 1 : 1;
+      } else if (currentIndex === 0) {
+        const first = others[0];
+        newOrder = first ? (first.data.sort_order ?? 0) - 1 : 1;
+      } else {
+        const a = others[currentIndex - 1].data.sort_order ?? 0;
+        const b = others[currentIndex].data.sort_order ?? 0;
+        newOrder = (a + b) / 2;
+      }
+
+      data.sort_order = newOrder;
+      layoutAll();
+
+      const { error } = await sb.from('notes').update({ sort_order: newOrder }).eq('id', data.id);
       if (error) toast(error.message);
     };
+
     head.addEventListener('pointermove', onMove);
     head.addEventListener('pointerup', onUp);
     head.addEventListener('pointercancel', onUp);
   });
 
   /* ── edit ── */
-  body.addEventListener('keydown', e => {
-    if (e.key === 'Escape') body.blur();
-  });
+  body.addEventListener('keydown', e => { if (e.key === 'Escape') body.blur(); });
+  body.addEventListener('focus', () => bringFront(entry));
 
-  let lastSent = 0;
+  let lastTyped = 0;
   body.addEventListener('input', () => {
-    autoSize(entry);
     const now = Date.now();
-    if (now - lastSent > 350) {
-      lastSent = now;
+    if (now - lastTyped > 300) {
+      lastTyped = now;
       room?.send({
         type: 'broadcast', event: 'typing',
         payload: { id: me.id, name: me.name, color: me.color, noteId: data.id }
@@ -854,15 +961,13 @@ function wireNote(entry) {
     }
   });
 
-  body.addEventListener('focus', () => bringFront(entry));
-
   body.addEventListener('blur', async () => {
     const text = body.innerText.replace(/\n{3,}/g, '\n\n').trim();
     if (!text) return removeNote(data.id);
     if (text === (data.text || '')) { body.innerText = text; return; }
     data.text = text;
     body.innerText = text;
-    autoSize(entry);
+    layoutAll();
     const { error } = await sb.from('notes').update({ text }).eq('id', data.id);
     if (error) toast(error.message);
     else tick(`<b style="color:${HEX[data.color]}">${data.author}</b> edited a note`);
@@ -881,10 +986,7 @@ function wireNote(entry) {
   };
 
   /* ── delete ── */
-  el.querySelector('.a-del').onclick = e => {
-    e.stopPropagation();
-    removeNote(data.id);
-  };
+  el.querySelector('.a-del').onclick = e => { e.stopPropagation(); removeNote(data.id); };
 }
 
 async function removeNote(id) {
@@ -894,52 +996,45 @@ async function removeNote(id) {
   if (error) toast(error.message);
 }
 
-/* ══════════════════════ create ══════════════════════ */
-async function addNote(atX, atY) {
-  const w = isMobile() ? 180 : 200;
-  const x = atX ?? Math.max(12, Math.min(innerWidth  - w - 12, innerWidth  / 2 - w/2 + (Math.random()*200-100)));
-  const y = atY ?? Math.max(74, Math.min(innerHeight - 200, innerHeight / 2 - 60 + (Math.random()*140-70)));
+/* ════════════════ create ════════════════ */
+async function addNote() {
   const color = pick(PALETTE);
-
+  const now = Date.now() / 1000;
   const { data, error } = await sb.from('notes')
-    .insert({ x, y, text:'', color, author: me.name })
+    .insert({ text:'', color, author: me.name, sort_order: now, x: 0, y: 0 })
     .select().single();
-
   if (error) return toast(error.message);
-
   chord([660, 880, 1100], 0.08);
   upsertNote(data);
   bringFront(notes.get(data.id));
   tick(`<b style="color:${HEX[color]}">${me.name}</b> dropped a note`);
-  setTimeout(() => notes.get(data.id)?.el.querySelector('.body').focus(), 90);
+  setTimeout(() => {
+    const body = notes.get(data.id)?.el.querySelector('.body');
+    if (body) body.focus();
+  }, 120);
 }
 
 $('#add').onclick = () => addNote();
 
-canvas.addEventListener('dblclick', e => {
-  if (e.target.closest('.note, .emoji-picker')) return;
-  addNote(e.clientX - 90, e.clientY - 30);
+document.addEventListener('dblclick', e => {
+  if (e.target.closest('.note, .emoji-picker, #bar')) return;
+  addNote();
 });
 
-/* double-TAP on mobile — dblclick fires if user-scalable=no, but be safe */
+/* mobile double-tap */
 let lastTap = 0, lastTapX = 0, lastTapY = 0;
-canvas.addEventListener('touchend', e => {
+document.addEventListener('touchend', e => {
   if (!isMobile()) return;
-  if (e.target.closest('.note, .emoji-picker, button')) return;
-  const t = e.changedTouches[0];
-  if (!t) return;
+  if (e.target.closest('.note, .emoji-picker, #bar, button')) return;
+  const t = e.changedTouches[0]; if (!t) return;
   const now = Date.now();
-  if (now - lastTap < 300 && Math.hypot(t.clientX - lastTapX, t.clientY - lastTapY) < 40) {
-    addNote(t.clientX - 90, t.clientY - 30);
-    lastTap = 0;
-  } else {
-    lastTap = now; lastTapX = t.clientX; lastTapY = t.clientY;
-  }
+  if (now - lastTap < 320 && Math.hypot(t.clientX - lastTapX, t.clientY - lastTapY) < 40) {
+    addNote(); lastTap = 0;
+  } else { lastTap = now; lastTapX = t.clientX; lastTapY = t.clientY; }
 }, { passive: true });
 
 addEventListener('keydown', e => {
-  const typing = e.target.closest('input, textarea, [contenteditable="true"]');
-  if (typing) return;
+  if (e.target.closest('input, textarea, [contenteditable="true"]')) return;
   if (e.key === 'n' || e.key === 'N') { e.preventDefault(); addNote(); }
   if (e.key === 'Escape') closePicker();
 });
@@ -955,16 +1050,7 @@ muteBtn.onclick = () => {
 };
 paintMute();
 
-/* ══════════════════════ broadcast queues ══════════════════════ */
-function queueMove(id, x, y) {
-  moveBuf = { id, x, y };
-  if (moveTimer) return;
-  moveTimer = setTimeout(() => {
-    moveTimer = null;
-    if (moveBuf) { room?.send({ type:'broadcast', event:'move', payload: moveBuf }); moveBuf = null; }
-  }, 45);
-}
-
+/* ════════════════ broadcasts ════════════════ */
 addEventListener('pointermove', e => {
   if (!room) return;
   cursorBuf = { id: me.id, name: me.name, color: me.color, x: e.clientX, y: e.clientY };
@@ -975,8 +1061,7 @@ addEventListener('pointermove', e => {
   }, 55);
 }, { passive: true });
 
-/* ══════════════════════ cursors ══════════════════════ */
-const cursorEls = new Map();
+/* ════════════════ cursors ════════════════ */
 function drawCursor(p) {
   if (p.id === me.id) return;
   let el = cursorEls.get(p.id);
@@ -1001,7 +1086,7 @@ function drawCursor(p) {
   el._kill = setTimeout(() => { el.remove(); cursorEls.delete(p.id); }, 7000);
 }
 
-/* ══════════════════════ presence ══════════════════════ */
+/* ════════════════ presence ════════════════ */
 let lastUsers = 0;
 function renderPeople() {
   if (!room) return;
@@ -1033,21 +1118,22 @@ function renderPeople() {
   lastUsers = users.length;
 }
 
-/* ══════════════════════ boot ══════════════════════ */
+/* ════════════════ boot ════════════════ */
 async function boot() {
   const url = SUPABASE_URL.replace(/\/+$/,'').replace(/\/rest\/v1$/,'');
   sb = createClient(url, SUPABASE_KEY, { realtime: { params: { eventsPerSecond: 25 } } });
 
-  /* check schema */
-  const probe = await sb.from('notes').select('id,reactions').limit(1);
-  if (probe.error && /reactions/i.test(probe.error.message)) {
-    toast('Missing `reactions` column — run the SQL.');
+  const probe = await sb.from('notes').select('id,reactions,sort_order').limit(1);
+  if (probe.error) {
+    if (/reactions/i.test(probe.error.message)) toast('Missing `reactions` column — run the SQL.');
+    if (/sort_order/i.test(probe.error.message)) toast('Missing `sort_order` column — run the SQL.');
   }
 
-  const { data, error } = await sb.from('notes').select('*').order('created_at', { ascending:true });
+  const { data, error } = await sb.from('notes').select('*').order('sort_order', { ascending:true });
   if (error) { toast('DB error: ' + error.message); console.error(error); return; }
   data.forEach(upsertNote);
   updateEmpty();
+  layoutAll();
 
   /* rows realtime */
   sb.channel('nebula-db')
@@ -1062,17 +1148,7 @@ async function boot() {
   room
     .on('presence', { event:'sync' }, renderPeople)
     .on('broadcast', { event:'cursor' }, ({ payload }) => drawCursor(payload))
-    .on('broadcast', { event:'move' }, ({ payload }) => {
-      const entry = notes.get(payload.id);
-      if (!entry || entry.el.classList.contains('dragging')) return;
-      entry.data.x = payload.x; entry.data.y = payload.y;
-      setPos(entry.el, payload.x, payload.y);
-    })
     .on('broadcast', { event:'typing' }, ({ payload }) => markTyping(payload))
-    .on('broadcast', { event:'react' }, ({ payload }) => {
-      spawnEmoji(payload.x, payload.y, payload.emoji);
-      blip(760, 0.05, 'triangle', 0.03);
-    })
     .subscribe(async status => {
       setStatus(status);
       if (status === 'SUBSCRIBED') {
@@ -1084,20 +1160,14 @@ async function boot() {
 
   addEventListener('beforeunload', () => room?.untrack());
 
-  /* reposition notes on resize / orientation change */
+  /* resize → re-layout */
+  let rzT;
   addEventListener('resize', () => {
-    notes.forEach(entry => {
-      autoSize(entry);
-      const maxX = innerWidth  - entry.el.offsetWidth  - 8;
-      const maxY = innerHeight - entry.el.offsetHeight - 8;
-      if (entry.data.x > maxX) entry.data.x = Math.max(8, maxX);
-      if (entry.data.y > maxY) entry.data.y = Math.max(70, maxY);
-      setPos(entry.el, entry.data.x, entry.data.y);
-    });
     closePicker();
+    clearTimeout(rzT);
+    rzT = setTimeout(() => layoutAll(), 80);
   });
 
-  /* tap-away closes picker globally */
   document.addEventListener('scroll', closePicker, true);
 }
 
