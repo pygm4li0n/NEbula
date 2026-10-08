@@ -3,67 +3,99 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>NEBULA — a collaborative wall</title>
+<title>NEBULA · live wall</title>
 <style>
   *{box-sizing:border-box}
   html,body{height:100%}
   body{
-    margin:0; overflow:hidden; color:#e9e9f2;
+    margin:0; overflow:hidden; color:#ececf5;
     font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Inter,Roboto,sans-serif;
-    background:#07070d; -webkit-font-smoothing:antialiased;
+    background:#06060c; -webkit-font-smoothing:antialiased;
+    user-select:none;
   }
   button{font-family:inherit}
+  input{font-family:inherit}
 
+  /* ───────── canvas ───────── */
   #canvas{
     position:fixed; inset:0; overflow:hidden;
     background:
-      radial-gradient(1100px 780px at 12% -5%, rgba(124,88,255,.18), transparent 62%),
-      radial-gradient(900px 700px at 92% 105%, rgba(0,208,255,.13), transparent 62%),
-      radial-gradient(700px 500px at 50% 50%, rgba(255,90,180,.06), transparent 70%),
-      #07070d;
+      radial-gradient(1200px 800px at 15% -10%, rgba(140,90,255,.22), transparent 60%),
+      radial-gradient(1000px 700px at 90% 110%, rgba(0,210,255,.16), transparent 60%),
+      radial-gradient(800px 600px at 50% 50%, rgba(255,90,180,.08), transparent 70%),
+      #06060c;
   }
   #canvas::before{
     content:""; position:absolute; inset:-2px; pointer-events:none;
     background-image:
-      linear-gradient(rgba(255,255,255,.038) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,.038) 1px, transparent 1px);
-    background-size:44px 44px;
-    -webkit-mask-image:radial-gradient(circle at 50% 42%, #000 38%, transparent 88%);
-    mask-image:radial-gradient(circle at 50% 42%, #000 38%, transparent 88%);
+      linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+    background-size:46px 46px;
+    -webkit-mask-image:radial-gradient(circle at 50% 42%, #000 35%, transparent 88%);
+    mask-image:radial-gradient(circle at 50% 42%, #000 35%, transparent 88%);
+  }
+  /* aurora */
+  #aurora{
+    position:fixed; inset:-20%; pointer-events:none; z-index:0; opacity:.5;
+    background:
+      radial-gradient(600px 300px at 20% 30%, rgba(140,90,255,.28), transparent 60%),
+      radial-gradient(700px 400px at 75% 65%, rgba(0,210,255,.20), transparent 60%),
+      radial-gradient(500px 250px at 50% 85%, rgba(255,90,180,.18), transparent 60%);
+    filter:blur(70px);
+    animation:drift 24s ease-in-out infinite alternate;
+  }
+  @keyframes drift{
+    0%  {transform:translate3d(-2%, -2%,0) rotate(0deg)}
+    100%{transform:translate3d( 2%,  3%,0) rotate(6deg)}
   }
 
+  /* ───────── top bar ───────── */
   #bar{
-    position:fixed; top:0; left:0; right:0; height:62px; z-index:9000;
-    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    position:fixed; top:0; left:0; right:0; height:64px; z-index:9000;
+    display:flex; align-items:center; gap:14px;
     padding:0 16px; pointer-events:none;
-    background:linear-gradient(180deg, rgba(7,7,13,.92), rgba(7,7,13,.4) 65%, transparent);
-    -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+    background:linear-gradient(180deg, rgba(6,6,12,.94), rgba(6,6,12,.35) 70%, transparent);
+    -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
   }
   #bar > *{pointer-events:auto}
-  .brand{display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.22em; font-size:13px}
+  .brand{display:flex; align-items:center; gap:10px; font-weight:800; letter-spacing:.24em; font-size:13px; flex-shrink:0}
   .orb{
-    width:12px; height:12px; border-radius:50%;
+    width:13px; height:13px; border-radius:50%;
     background:radial-gradient(circle at 32% 30%, #fff, #8b5cff 45%, #4dd4ff);
-    box-shadow:0 0 14px #8b5cff, 0 0 30px rgba(139,92,255,.55);
+    box-shadow:0 0 16px #8b5cff, 0 0 34px rgba(139,92,255,.6);
     animation:pulse 2.6s ease-in-out infinite;
   }
-  @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.22);opacity:.75}}
-  .right{display:flex; align-items:center; gap:10px}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.24);opacity:.72}}
 
+  #ticker{
+    flex:1; min-width:0; text-align:center;
+    font-size:12.5px; font-weight:600; color:#a9a9c6;
+    letter-spacing:.02em; opacity:0; transform:translateY(-4px);
+    transition:opacity .3s, transform .3s; pointer-events:none;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    display:flex; align-items:center; justify-content:center; gap:6px;
+  }
+  #ticker.show{opacity:1; transform:translateY(0)}
+  #ticker .dot{width:5px; height:5px; border-radius:50%; background:#8b5cff; box-shadow:0 0 8px #8b5cff}
+
+  .right{display:flex; align-items:center; gap:10px; flex-shrink:0}
   .people{display:flex; align-items:center}
   .avatar{
     width:28px; height:28px; border-radius:50%; margin-left:-9px;
     display:grid; place-items:center; font-size:11px; font-weight:800;
-    border:2px solid #0b0b14; box-shadow:0 0 12px -2px currentColor;
-    animation:pop .3s cubic-bezier(.2,1.5,.4,1); color:#07070d;
+    border:2px solid #0b0b14; color:#07070d;
+    box-shadow:0 0 12px -2px currentColor;
+    animation:pop .3s cubic-bezier(.2,1.5,.4,1);
+    transition:transform .18s;
   }
+  .avatar:hover{transform:translateY(-2px) scale(1.08); z-index:2}
   .avatar:first-child{margin-left:0}
   .avatar.more{background:#23233a !important; color:#c9c9e0 !important}
   @keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
 
   .status{
-    display:flex; align-items:center; gap:7px; font-size:11px; font-weight:600;
-    color:#8b8ba7; letter-spacing:.06em; text-transform:uppercase;
+    display:flex; align-items:center; gap:7px; font-size:11px; font-weight:700;
+    color:#8b8ba7; letter-spacing:.08em; text-transform:uppercase;
     padding:6px 11px; border-radius:99px;
     background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.08);
   }
@@ -72,7 +104,7 @@
   .status.dead i{background:#ff5c7a; box-shadow:0 0 10px #ff5c7a}
 
   .btn{
-    all:unset; cursor:pointer; font-size:13px; font-weight:600; color:#e9e9f2;
+    all:unset; cursor:pointer; font-size:13px; font-weight:700; color:#ececf5;
     padding:9px 14px; border-radius:11px; text-align:center;
     background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.1);
     transition:.16s; white-space:nowrap;
@@ -83,120 +115,214 @@
     background:linear-gradient(140deg,#8b5cff,#4dd4ff); color:#07070d; border-color:transparent;
     box-shadow:0 8px 26px -10px #8b5cff;
   }
-  .btn.primary:hover{box-shadow:0 10px 32px -8px #8b5cff}
+  .btn.primary:hover{box-shadow:0 12px 34px -8px #8b5cff}
   .btn.icon{padding:9px 11px; font-size:14px; line-height:1}
 
+  /* ───────── notes ───────── */
   .note{
-    position:absolute; top:0; left:0; width:214px; padding:9px 10px 12px;
+    position:absolute; top:0; left:0;
+    width:200px; /* JS overrides */
+    padding:10px 12px 11px;
     border-radius:16px; cursor:default; touch-action:none;
-    background:linear-gradient(158deg, var(--c-soft), rgba(9,9,17,.85));
+    background:linear-gradient(158deg, var(--c-soft), rgba(9,9,17,.9));
     border:1px solid var(--c-line);
-    box-shadow:0 16px 40px -16px rgba(0,0,0,.95), 0 0 34px -16px var(--c), inset 0 1px 0 rgba(255,255,255,.06);
+    box-shadow:
+      0 14px 36px -18px rgba(0,0,0,.95),
+      0 0 30px -14px var(--c),
+      inset 0 1px 0 rgba(255,255,255,.06);
+    transition:box-shadow .2s, border-color .2s, width .18s cubic-bezier(.3,1.4,.4,1);
     will-change:transform;
-    animation:appear .3s ease both;
+    animation:dropIn .42s cubic-bezier(.2,1.4,.35,1) both;
+    user-select:none;
   }
-  @keyframes appear{from{opacity:0; filter:blur(8px)}to{opacity:1; filter:blur(0)}}
-  .note.gone{animation:vanish .22s ease forwards}
-  @keyframes vanish{to{opacity:0; filter:blur(8px); transform:scale(.92) translate(var(--tx),var(--ty))}}
+  @keyframes dropIn{
+    0%  {opacity:0; transform:translate3d(var(--tx),calc(var(--ty) - 24px),0) scale(.85); filter:blur(8px)}
+    60% {opacity:1; filter:blur(0)}
+    100%{opacity:1; transform:translate3d(var(--tx),var(--ty),0) scale(1); filter:blur(0)}
+  }
+  .note:hover{
+    box-shadow:
+      0 20px 46px -18px rgba(0,0,0,1),
+      0 0 44px -10px var(--c),
+      inset 0 1px 0 rgba(255,255,255,.08);
+    border-color:var(--c);
+  }
+  .note.gone{animation:vanish .26s ease forwards}
+  @keyframes vanish{to{opacity:0; filter:blur(10px); transform:scale(.9) translate(var(--tx),var(--ty))}}
   .note.dragging{
-    box-shadow:0 34px 70px -22px rgba(0,0,0,1), 0 0 46px -12px var(--c);
-    border-color:var(--c); cursor:grabbing;
+    box-shadow:
+      0 40px 80px -24px rgba(0,0,0,1),
+      0 0 58px -10px var(--c),
+      inset 0 1px 0 rgba(255,255,255,.1);
+    border-color:var(--c);
+    transition:none;
   }
-  .handle{display:flex; align-items:center; gap:6px; height:20px; cursor:grab; touch-action:none}
-  .note.dragging .handle{cursor:grabbing}
-  .who{
-    flex:1; min-width:0; font-size:9.5px; font-weight:800; letter-spacing:.13em;
-    text-transform:uppercase; opacity:.95; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+
+  .note-head{
+    display:flex; align-items:center; gap:8px; height:22px;
+    cursor:grab; touch-action:none;
   }
-  .acts{display:flex; gap:1px; opacity:0; transition:opacity .16s}
+  .note.dragging .note-head{cursor:grabbing}
+
+  .author{display:flex; align-items:center; gap:6px; flex:1; min-width:0}
+  .author .dot{
+    width:8px; height:8px; border-radius:50%; background:var(--c);
+    box-shadow:0 0 10px var(--c); flex-shrink:0;
+  }
+  .author .who{
+    font-size:10px; font-weight:800; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--c); opacity:.95;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .acts{display:flex; gap:1px; opacity:0; transition:opacity .16s; flex-shrink:0}
   .note:hover .acts, .note.dragging .acts{opacity:1}
   .acts button{
-    all:unset; width:19px; height:19px; display:grid; place-items:center; cursor:pointer;
+    all:unset; width:20px; height:20px; display:grid; place-items:center; cursor:pointer;
     border-radius:6px; font-size:10px; color:#d3d3e6; transition:.14s;
   }
   .acts button:hover{background:rgba(255,255,255,.16); color:#fff}
-  .acts .a-del:hover{background:rgba(255,80,110,.28); color:#ff8098}
+  .acts .a-del:hover{background:rgba(255,80,110,.3); color:#ff8098}
 
   .body{
-    margin-top:5px; min-height:98px; max-height:270px; overflow:auto; outline:none;
-    font-size:14px; line-height:1.46; color:#f3f3fb; white-space:pre-wrap; word-break:break-word;
+    margin:6px 0 0;
+    font-size:14px; line-height:1.5; color:#f5f5fd;
+    white-space:pre-wrap; word-break:break-word;
+    outline:none; cursor:text;
+    max-height:360px; overflow:auto;
+    user-select:text;
     scrollbar-width:thin; scrollbar-color:rgba(255,255,255,.18) transparent;
+    transition:min-height .15s;
   }
   .body::-webkit-scrollbar{width:5px}
   .body::-webkit-scrollbar-thumb{background:rgba(255,255,255,.18); border-radius:9px}
-  .body:empty::before{content:"write something…"; color:rgba(255,255,255,.24); pointer-events:none}
+  .body:empty::before{
+    content:"type…"; color:rgba(255,255,255,.22); pointer-events:none;
+  }
 
+  /* ───────── reactions ───────── */
+  .react-bar{
+    display:flex; flex-wrap:wrap; gap:5px; margin-top:9px;
+    min-height:22px; align-items:center;
+  }
+  .react-chip{
+    all:unset; cursor:pointer;
+    display:inline-flex; align-items:center; gap:4px;
+    padding:2px 8px 3px; border-radius:99px; font-size:12px;
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.09);
+    transition:.15s; line-height:1.2;
+    animation:chipIn .3s cubic-bezier(.2,1.5,.4,1);
+  }
+  @keyframes chipIn{from{transform:scale(0); opacity:0}to{transform:scale(1); opacity:1}}
+  .react-chip:hover{background:rgba(255,255,255,.13); transform:translateY(-1px)}
+  .react-chip b{font-size:11px; font-weight:800; color:#cfcfe6}
+  .react-chip.mine{
+    background:color-mix(in srgb, var(--c) 22%, transparent);
+    border-color:color-mix(in srgb, var(--c) 55%, transparent);
+  }
+  .react-chip.mine b{color:#fff}
+  .react-add{
+    all:unset; cursor:pointer;
+    display:inline-flex; align-items:center; justify-content:center;
+    width:22px; height:22px; border-radius:99px; font-size:13px; font-weight:700;
+    color:#8b8ba7; background:rgba(255,255,255,.05); border:1px dashed rgba(255,255,255,.14);
+    transition:.15s;
+  }
+  .react-add:hover{color:#fff; background:rgba(255,255,255,.12); border-color:var(--c); border-style:solid}
+
+  /* ───────── emoji picker popover ───────── */
+  .emoji-picker{
+    position:fixed; z-index:9700;
+    display:flex; gap:2px; padding:6px; border-radius:14px;
+    background:rgba(20,20,32,.96); border:1px solid rgba(255,255,255,.1);
+    box-shadow:0 20px 50px -12px #000;
+    -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+    animation:popIn .18s cubic-bezier(.2,1.5,.4,1);
+  }
+  @keyframes popIn{from{transform:translateY(6px) scale(.94); opacity:0}to{transform:translateY(0) scale(1); opacity:1}}
+  .emoji-picker button{
+    all:unset; cursor:pointer;
+    width:34px; height:34px; display:grid; place-items:center; border-radius:9px;
+    font-size:19px; transition:.12s;
+  }
+  .emoji-picker button:hover{background:rgba(255,255,255,.12); transform:scale(1.14)}
+
+  /* ───────── cursors ───────── */
   #cursors{position:fixed; inset:0; pointer-events:none; z-index:9500}
   .cursor{
     position:absolute; top:0; left:0; will-change:transform;
-    transition:transform .09s linear, opacity .4s;
+    transition:transform .09s linear;
     filter:drop-shadow(0 0 8px currentColor);
   }
   .cursor svg{display:block}
   .cursor .tag{
-    position:absolute; left:15px; top:15px; padding:2.5px 8px; border-radius:99px;
-    font-size:10px; font-weight:800; color:#07070d; white-space:nowrap; letter-spacing:.03em;
+    position:absolute; left:15px; top:15px;
+    padding:2.5px 8px; border-radius:99px;
+    font-size:10px; font-weight:800; color:#07070d;
+    white-space:nowrap; letter-spacing:.03em;
   }
 
+  /* ───────── emoji burst ───────── */
   .emoji{
-    position:fixed; font-size:28px; pointer-events:none; z-index:9600;
-    animation:floatUp 1.5s cubic-bezier(.2,.8,.3,1) forwards;
+    position:fixed; font-size:26px; pointer-events:none; z-index:9600;
+    animation:floatUp 1.6s cubic-bezier(.2,.8,.3,1) forwards;
   }
   @keyframes floatUp{
-    0%{transform:translate(-50%,-50%) scale(.4); opacity:0}
-    18%{transform:translate(-50%,-60%) scale(1.2); opacity:1}
-    100%{transform:translate(-50%,-260%) scale(.95); opacity:0}
+    0%  {transform:translate(-50%,-50%) scale(.3); opacity:0}
+    18% {transform:translate(-50%,-62%) scale(1.25); opacity:1}
+    100%{transform:translate(-50%,-260%) scale(.9); opacity:0}
+  }
+  .burst{
+    position:fixed; width:6px; height:6px; border-radius:50%;
+    pointer-events:none; z-index:9550;
+    animation:burst .7s ease-out forwards;
+  }
+  @keyframes burst{
+    0%  {transform:translate(-50%,-50%) scale(1); opacity:1}
+    100%{transform:translate(calc(-50% + var(--bx)), calc(-50% + var(--by))) scale(0); opacity:0}
   }
 
+  /* ───────── empty state ───────── */
   #hint{
     position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-    text-align:center; pointer-events:none; color:#6a6a86; user-select:none;
-    transition:opacity .4s;
+    text-align:center; pointer-events:none; user-select:none;
+    transition:opacity .5s;
   }
-  #hint h2{margin:0 0 8px; font-size:20px; letter-spacing:.05em; color:#8f8fb0; font-weight:700}
-  #hint p{margin:0; font-size:13px}
   #hint.hide{opacity:0}
+  #hint h2{
+    margin:0 0 10px; font-size:26px; letter-spacing:.04em; font-weight:800;
+    background:linear-gradient(120deg,#8b5cff,#4dd4ff,#ff6b9d);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:hue 6s linear infinite;
+  }
+  @keyframes hue{to{filter:hue-rotate(360deg)}}
+  #hint p{margin:0; font-size:13px; color:#6a6a86}
+  #hint kbd{
+    font-family:inherit; font-size:11px; font-weight:700;
+    background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.12);
+    border-radius:5px; padding:1px 6px; margin:0 2px; color:#c9c9e0;
+  }
 
-  #toasts{position:fixed; left:50%; bottom:26px; transform:translateX(-50%); z-index:9800; display:flex; flex-direction:column; gap:8px; align-items:center}
+  /* ───────── toasts ───────── */
+  #toasts{
+    position:fixed; left:50%; bottom:26px; transform:translateX(-50%);
+    z-index:9800; display:flex; flex-direction:column; gap:8px; align-items:center;
+    pointer-events:none;
+  }
   .toast{
     font-size:13px; padding:10px 16px; border-radius:12px; color:#fff;
-    background:rgba(30,20,45,.92); border:1px solid rgba(255,120,150,.35);
-    box-shadow:0 14px 40px -12px #000; animation:appear .25s ease both;
+    background:rgba(30,20,45,.94); border:1px solid rgba(255,120,150,.35);
+    box-shadow:0 14px 40px -12px #000;
+    animation:popIn .25s ease both;
   }
-
-  #setup{
-    position:fixed; inset:0; z-index:10000; display:none; place-items:center; padding:20px;
-    background:rgba(4,4,10,.9); -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px);
-  }
-  #setup.show{display:grid}
-  .card{
-    width:min(600px,100%); max-height:92vh; overflow:auto;
-    background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.1);
-    border-radius:22px; padding:28px; box-shadow:0 40px 100px -30px #000;
-    animation:appear .35s ease both;
-  }
-  .card h1{margin:0 0 6px; font-size:22px; letter-spacing:.03em}
-  .card .sub{margin:0 0 22px; font-size:13.5px; color:#8b8ba7; line-height:1.55}
-  .field{margin-bottom:14px}
-  .field label{display:block; font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:#8b8ba7; margin-bottom:7px}
-  .field input{
-    width:100%; padding:12px 14px; border-radius:11px; font-size:13.5px; color:#e9e9f2;
-    background:rgba(0,0,0,.35); border:1px solid rgba(255,255,255,.12); outline:none;
-    transition:.16s; font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
-  }
-  .field input:focus{border-color:#8b5cff; box-shadow:0 0 0 3px rgba(139,92,255,.18)}
-  .row{display:flex; gap:10px; margin-top:20px}
-  .row .btn{flex:1}
-  .err{color:#ff8098; font-size:13px; margin:0 0 14px; display:none}
-  .err.show{display:block}
 </style>
 </head>
 <body>
 
+<div id="aurora"></div>
 <div id="canvas">
   <div id="hint">
-    <h2>the wall is empty</h2>
-    <p>Hit <strong>+ Note</strong> to drop the first idea.</p>
+    <h2>the wall is waiting</h2>
+    <p>Press <kbd>N</kbd> · or double-click anywhere · or hit <strong>+ Note</strong></p>
   </div>
 </div>
 
@@ -204,41 +330,25 @@
 
 <header id="bar">
   <div class="brand"><span class="orb"></span> NEBULA</div>
+  <div id="ticker"><span class="dot"></span><span id="tickerText"></span></div>
   <div class="right">
     <div class="people" id="people"></div>
     <span class="status" id="status"><i></i><span id="statusText">connecting</span></span>
     <button class="btn primary" id="add">+ Note</button>
-    <button class="btn icon" id="gear" title="Settings">⚙</button>
+    <button class="btn icon" id="mute" title="Sound">🔊</button>
   </div>
 </header>
 
 <div id="toasts"></div>
 
-<div id="setup">
-  <div class="card">
-    <h1>Connect Supabase</h1>
-    <p class="sub">Paste your Project URL and anon/public key. Stored locally in this browser only — nothing is sent anywhere else.</p>
-    <p class="err" id="setupErr"></p>
-
-    <div class="field">
-      <label>Project URL</label>
-      <input id="s-url" placeholder="https://xxxxxxxxxxxx.supabase.co" autocomplete="off" spellcheck="false" />
-    </div>
-    <div class="field">
-      <label>Anon / publishable key</label>
-      <input id="s-key" placeholder="sb_publishable_...  or  eyJhbGci..." autocomplete="off" spellcheck="false" />
-    </div>
-
-    <div class="row">
-      <button class="btn" id="s-cancel" style="display:none">Cancel</button>
-      <button class="btn primary" id="s-save">Connect →</button>
-    </div>
-  </div>
-</div>
-
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
+/* ══════════════════════════ config ══════════════════════════ */
+const SUPABASE_URL = 'https://piexelytvvfsoeqhlokb.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_neiQC042cfc6Io2r8Cf6hw_WoecdytJ';
+
+/* ══════════════════════════ helpers ══════════════════════════ */
 const $  = s => document.querySelector(s);
 const pick = a => a[Math.floor(Math.random() * a.length)];
 const uid  = () => crypto.randomUUID?.() ?? 'id-' + Math.random().toString(36).slice(2) + Date.now();
@@ -253,10 +363,11 @@ const HEX = {
   green:'#6bff9d', violet:'#b28dff', orange:'#ffa94d'
 };
 const NAMES = ['Nova','Comet','Pulsar','Quasar','Orion','Vega','Lyra','Atlas',
-               'Rigel','Sirius','Zenith','Cosmo','Astra','Nyx','Echo','Meteor'];
-const EMOJI = ['✨','🔥','💡','🎯','🚀','💜','⚡','🌈','🧠','👀','🎉','🍕'];
+               'Rigel','Sirius','Zenith','Cosmo','Astra','Nyx','Echo','Meteor',
+               'Phoenix','Hydra','Indigo','Sol','Luna'];
+const REACTS = ['✨','🔥','💜','🚀','🎯','💡'];
 
-/* identity */
+/* ══════════════════════════ identity ══════════════════════════ */
 let me;
 try { me = JSON.parse(sessionStorage.getItem('nebula.me')); } catch {}
 if (!me) {
@@ -264,40 +375,36 @@ if (!me) {
   sessionStorage.setItem('nebula.me', JSON.stringify(me));
 }
 
-/* config */
-const CFG = {
-  url: (localStorage.getItem('nebula.url') || '').replace(/\/+$/,'').replace(/\/rest\/v1$/,''),
-  key: (localStorage.getItem('nebula.key') || '').trim()
-};
-
-const setupEl = $('#setup');
-function showSetup(err) {
-  setupEl.classList.add('show');
-  $('#s-url').value = CFG.url;
-  $('#s-key').value = CFG.key;
-  $('#s-cancel').style.display = (CFG.url && CFG.key) ? '' : 'none';
-  const e = $('#setupErr');
-  if (err) { e.textContent = err; e.classList.add('show'); }
-  else e.classList.remove('show');
-}
-$('#s-save').onclick = () => {
-  const u = $('#s-url').value.trim().replace(/\/+$/,'').replace(/\/rest\/v1$/,'');
-  const k = $('#s-key').value.trim();
-  if (!u || !k) return showSetup('Both fields are required.');
-  localStorage.setItem('nebula.url', u);
-  localStorage.setItem('nebula.key', k);
-  location.reload();
-};
-$('#s-cancel').onclick = () => setupEl.classList.remove('show');
-$('#gear').onclick = () => showSetup();
-
-/* state */
+/* ══════════════════════════ state ══════════════════════════ */
 const canvas  = $('#canvas');
 const cursors = $('#cursors');
 const notes   = new Map();
 let sb, room, zTop = 10;
 let moveBuf=null, moveTimer=null, cursorBuf=null, cursorTimer=null;
+let soundOn = localStorage.getItem('nebula.mute') !== '1';
 
+/* ══════════════════════════ sound ══════════════════════════ */
+let actx;
+function blip(freq = 880, dur = 0.07, type = 'sine', gain = 0.045) {
+  if (!soundOn) return;
+  try {
+    if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = actx.createOscillator();
+    const g = actx.createGain();
+    o.type = type;
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(gain, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime + dur);
+    o.connect(g).connect(actx.destination);
+    o.start();
+    o.stop(actx.currentTime + dur);
+  } catch {}
+}
+function chord(freqs, dur = 0.14) {
+  freqs.forEach((f, i) => setTimeout(() => blip(f, dur), i * 22));
+}
+
+/* ══════════════════════════ toast ══════════════════════════ */
 function toast(msg) {
   const el = document.createElement('div');
   el.className = 'toast';
@@ -311,6 +418,17 @@ function toast(msg) {
   }, 4200);
 }
 
+/* ══════════════════════════ ticker ══════════════════════════ */
+let tickTimer;
+function tick(html) {
+  const el = $('#ticker');
+  $('#tickerText').innerHTML = html;
+  el.classList.add('show');
+  clearTimeout(tickTimer);
+  tickTimer = setTimeout(() => el.classList.remove('show'), 3600);
+}
+
+/* ══════════════════════════ status ══════════════════════════ */
 function setStatus(state) {
   const el = $('#status'), txt = $('#statusText');
   el.classList.remove('live','dead');
@@ -319,10 +437,29 @@ function setStatus(state) {
   else { txt.textContent = 'connecting'; }
 }
 
-function setPos(el, x, y) {
+/* ══════════════════════════ sizing ══════════════════════════ */
+/* Notes auto-size: width grows with content length via sqrt curve, height
+   follows content naturally. Long text → wide note → wraps → taller.       */
+function autoSize(entry) {
+  const text = (entry.data.text || '').trim();
+  const len  = text.length;
+  const longest = text ? Math.max(...text.split('\n').map(l => l.length)) : 0;
+
+  let w = 190;
+  if (len > 0) {
+    const byTotal = 100 + Math.sqrt(len) * 30;
+    const byLine  = Math.min(longest, 42) * 8.4 + 60;
+    w = Math.max(byTotal, byLine);
+  }
+  w = Math.min(380, Math.max(170, Math.round(w)));
+  entry.el.style.width = w + 'px';
+}
+
+/* ══════════════════════════ note render ══════════════════════════ */
+function setPos(el, x, y, rot = 0) {
   el.style.setProperty('--tx', x + 'px');
   el.style.setProperty('--ty', y + 'px');
-  el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+  el.style.transform = `translate3d(${x}px, ${y}px, 0) rotate(${rot}deg)`;
 }
 
 function renderNote(entry) {
@@ -331,6 +468,7 @@ function renderNote(entry) {
   el.style.setProperty('--c', hex);
   el.style.setProperty('--c-soft', hexA(hex, .13));
   el.style.setProperty('--c-line', hexA(hex, .42));
+
   if (!el.classList.contains('dragging')) setPos(el, data.x, data.y);
 
   const body = el.querySelector('.body');
@@ -338,8 +476,10 @@ function renderNote(entry) {
   if (document.activeElement !== body && body.innerText !== text) body.innerText = text;
 
   const who = el.querySelector('.who');
-  who.textContent = data.author || '';
-  who.style.color = hex;
+  who.textContent = data.author || '?';
+
+  autoSize(entry);
+  renderReactions(entry);
 }
 
 function createNoteEl(data) {
@@ -347,15 +487,15 @@ function createNoteEl(data) {
   el.className = 'note';
   el.dataset.id = data.id;
   el.innerHTML = `
-    <div class="handle">
-      <span class="who"></span>
+    <header class="note-head">
+      <div class="author"><span class="dot"></span><span class="who"></span></div>
       <div class="acts">
-        <button class="a-react" title="React">✦</button>
         <button class="a-color" title="Recolour">◐</button>
         <button class="a-del"   title="Delete">✕</button>
       </div>
-    </div>
+    </header>
     <div class="body" contenteditable="true" spellcheck="false"></div>
+    <footer class="react-bar"></footer>
   `;
   return el;
 }
@@ -382,59 +522,192 @@ function dropNote(id) {
   const el = entry.el;
   el.style.pointerEvents = 'none';
   el.classList.add('gone');
-  setTimeout(() => { el.remove(); updateEmpty(); }, 240);
+  setTimeout(() => { el.remove(); updateEmpty(); }, 260);
   updateEmpty();
 }
 
-function updateEmpty() {
-  $('#hint').classList.toggle('hide', notes.size > 0);
-}
-
+function updateEmpty() { $('#hint').classList.toggle('hide', notes.size > 0); }
 function bringFront(entry) { entry.el.style.zIndex = ++zTop; }
 
+/* ══════════════════════════ reactions ══════════════════════════ */
+function renderReactions(entry) {
+  closePicker();
+  const bar = entry.el.querySelector('.react-bar');
+  const r = entry.data.reactions || {};
+  bar.innerHTML = '';
+
+  Object.entries(r).forEach(([emoji, users]) => {
+    if (!Array.isArray(users) || !users.length) return;
+    const mine = users.includes(me.id);
+    const btn = document.createElement('button');
+    btn.className = 'react-chip' + (mine ? ' mine' : '');
+    btn.innerHTML = `<span>${emoji}</span><b>${users.length}</b>`;
+    btn.onclick = e => { e.stopPropagation(); toggleReaction(entry.data.id, emoji); };
+    bar.appendChild(btn);
+  });
+
+  const add = document.createElement('button');
+  add.className = 'react-add';
+  add.textContent = '+';
+  add.title = 'React';
+  add.onclick = e => { e.stopPropagation(); openPicker(entry, add); };
+  bar.appendChild(add);
+}
+
+async function toggleReaction(noteId, emoji) {
+  const entry = notes.get(noteId);
+  if (!entry) return;
+
+  const reactions = { ...(entry.data.reactions || {}) };
+  const arr = Array.isArray(reactions[emoji]) ? [...reactions[emoji]] : [];
+  const i = arr.indexOf(me.id);
+  if (i >= 0) arr.splice(i, 1);
+  else arr.push(me.id);
+
+  if (arr.length) reactions[emoji] = arr;
+  else delete reactions[emoji];
+
+  const added = i < 0;
+  entry.data.reactions = reactions;
+  renderReactions(entry);
+
+  if (added) {
+    burst(entry, emoji);
+    blip(720 + Math.random() * 220, 0.06, 'triangle', 0.04);
+  } else {
+    blip(420, 0.05, 'sine', 0.03);
+  }
+
+  const { error } = await sb.from('notes').update({ reactions }).eq('id', noteId);
+  if (error) toast(error.message);
+}
+
+function openPicker(entry, anchor) {
+  closePicker();
+  const picker = document.createElement('div');
+  picker.className = 'emoji-picker';
+  REACTS.forEach(e => {
+    const b = document.createElement('button');
+    b.textContent = e;
+    b.onclick = ev => {
+      ev.stopPropagation();
+      toggleReaction(entry.data.id, e);
+      closePicker();
+    };
+    picker.appendChild(b);
+  });
+  document.body.appendChild(picker);
+
+  const r = anchor.getBoundingClientRect();
+  const pw = picker.offsetWidth || 220;
+  picker.style.left = Math.max(8, Math.min(innerWidth - pw - 8, r.left - pw / 2 + r.width / 2)) + 'px';
+  picker.style.top  = Math.max(8, r.top - 46) + 'px';
+
+  setTimeout(() => {
+    document.addEventListener('pointerdown', closePicker, { once: true });
+  }, 0);
+}
+function closePicker() {
+  document.querySelectorAll('.emoji-picker').forEach(p => p.remove());
+}
+
+/* ══════════════════════════ bursts ══════════════════════════ */
+function burst(entry, emoji) {
+  const rect = entry.el.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+
+  // center emoji rise
+  spawnEmoji(cx, cy, emoji);
+
+  // sparkle particles
+  const hex = HEX[entry.data.color] || '#fff';
+  for (let i = 0; i < 8; i++) {
+    const p = document.createElement('div');
+    p.className = 'burst';
+    p.style.left = cx + 'px';
+    p.style.top  = cy + 'px';
+    p.style.background = hex;
+    p.style.boxShadow = `0 0 10px ${hex}`;
+    const ang = (Math.PI * 2 * i) / 8 + Math.random() * 0.4;
+    const dist = 34 + Math.random() * 26;
+    p.style.setProperty('--bx', Math.cos(ang) * dist + 'px');
+    p.style.setProperty('--by', Math.sin(ang) * dist + 'px');
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 720);
+  }
+}
+
+function spawnEmoji(x, y, emoji) {
+  const el = document.createElement('div');
+  el.className = 'emoji';
+  el.textContent = emoji;
+  el.style.left = x + 'px';
+  el.style.top  = y + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1700);
+}
+
+/* ══════════════════════════ wire note ══════════════════════════ */
 function wireNote(entry) {
   const { el, data } = entry;
-  const handle = el.querySelector('.handle');
-  const body   = el.querySelector('.body');
+  const head = el.querySelector('.note-head');
+  const body = el.querySelector('.body');
 
   el.addEventListener('pointerdown', () => bringFront(entry), true);
 
-  handle.addEventListener('pointerdown', e => {
+  /* ── drag ── */
+  head.addEventListener('pointerdown', e => {
     if (e.target.closest('button')) return;
     e.preventDefault();
     bringFront(entry);
     el.classList.add('dragging');
-    handle.setPointerCapture(e.pointerId);
+    head.setPointerCapture(e.pointerId);
 
     const sx = e.clientX, sy = e.clientY;
     const ox = data.x, oy = data.y;
     let moved = false;
+    let lastX = sx;
 
     const onMove = ev => {
       const dx = ev.clientX - sx, dy = ev.clientY - sy;
       if (!moved && Math.abs(dx) + Math.abs(dy) > 3) moved = true;
+
       data.x = ox + dx;
       data.y = oy + dy;
-      setPos(el, data.x, data.y);
+
+      // slight tilt based on horizontal velocity
+      const vx = ev.clientX - lastX;
+      lastX = ev.clientX;
+      const rot = Math.max(-5, Math.min(5, vx * 0.35));
+
+      setPos(el, data.x, data.y, rot);
       queueMove(data.id, data.x, data.y);
     };
 
     const onUp = async () => {
-      handle.removeEventListener('pointermove', onMove);
-      handle.removeEventListener('pointerup', onUp);
-      handle.removeEventListener('pointercancel', onUp);
+      head.removeEventListener('pointermove', onMove);
+      head.removeEventListener('pointerup', onUp);
+      head.removeEventListener('pointercancel', onUp);
       el.classList.remove('dragging');
+      setPos(el, data.x, data.y, 0);
       if (!moved) return;
       const { error } = await sb.from('notes').update({ x: data.x, y: data.y }).eq('id', data.id);
       if (error) toast(error.message);
     };
 
-    handle.addEventListener('pointermove', onMove);
-    handle.addEventListener('pointerup', onUp);
-    handle.addEventListener('pointercancel', onUp);
+    head.addEventListener('pointermove', onMove);
+    head.addEventListener('pointerup', onUp);
+    head.addEventListener('pointercancel', onUp);
   });
 
-  body.addEventListener('keydown', e => { if (e.key === 'Escape') body.blur(); });
+  /* ── edit ── */
+  body.addEventListener('keydown', e => {
+    if (e.key === 'Escape') body.blur();
+  });
+
+  // auto-grow while typing
+  body.addEventListener('input', () => autoSize(entry));
 
   body.addEventListener('blur', async () => {
     const text = body.innerText.replace(/\n{3,}/g, '\n\n').trim();
@@ -442,28 +715,25 @@ function wireNote(entry) {
     if (text === (data.text || '')) { body.innerText = text; return; }
     data.text = text;
     body.innerText = text;
+    autoSize(entry);
     const { error } = await sb.from('notes').update({ text }).eq('id', data.id);
     if (error) toast(error.message);
+    else tick(`<b style="color:${HEX[data.color]}">${data.author}</b> edited a note`);
   });
 
+  /* ── colour ── */
   el.querySelector('.a-color').onclick = async e => {
     e.stopPropagation();
     const i = PALETTE.indexOf(data.color);
     const next = PALETTE[(i + 1) % PALETTE.length];
     data.color = next;
     renderNote(entry);
+    blip(560, 0.05, 'triangle', 0.03);
     const { error } = await sb.from('notes').update({ color: next }).eq('id', data.id);
     if (error) toast(error.message);
   };
 
-  el.querySelector('.a-react').onclick = e => {
-    e.stopPropagation();
-    const emoji = pick(EMOJI);
-    const x = data.x + 105, y = data.y + 30;
-    spawnEmoji(x, y, emoji);
-    room?.send({ type:'broadcast', event:'react', payload:{ x, y, emoji } });
-  };
-
+  /* ── delete ── */
   el.querySelector('.a-del').onclick = e => {
     e.stopPropagation();
     removeNote(data.id);
@@ -472,23 +742,57 @@ function wireNote(entry) {
 
 async function removeNote(id) {
   dropNote(id);
+  blip(300, 0.09, 'sine', 0.035);
   const { error } = await sb.from('notes').delete().eq('id', id);
   if (error) toast(error.message);
 }
 
-async function addNote() {
-  const x = Math.max(20, Math.min(innerWidth - 240, innerWidth / 2 - 107 + (Math.random()*200-100)));
-  const y = Math.max(80, Math.min(innerHeight - 220, innerHeight / 2 - 70 + (Math.random()*160-80)));
+/* ══════════════════════════ create ══════════════════════════ */
+async function addNote(atX, atY) {
+  const x = atX ?? Math.max(20, Math.min(innerWidth  - 240, innerWidth  / 2 - 95 + (Math.random()*220-110)));
+  const y = atY ?? Math.max(80, Math.min(innerHeight - 220, innerHeight / 2 - 70 + (Math.random()*160-80)));
+  const color = pick(PALETTE);
+
   const { data, error } = await sb.from('notes')
-    .insert({ x, y, text:'', color: pick(PALETTE), author: me.name })
+    .insert({ x, y, text:'', color, author: me.name })
     .select().single();
+
   if (error) return toast(error.message);
+
+  chord([660, 880, 1100], 0.08);
   upsertNote(data);
   bringFront(notes.get(data.id));
-  setTimeout(() => notes.get(data.id)?.el.querySelector('.body').focus(), 70);
+  tick(`<b style="color:${HEX[color]}">${me.name}</b> dropped a note`);
+  setTimeout(() => notes.get(data.id)?.el.querySelector('.body').focus(), 90);
 }
-$('#add').onclick = addNote;
 
+$('#add').onclick = () => addNote();
+
+/* double-click empty canvas → note there */
+canvas.addEventListener('dblclick', e => {
+  if (e.target.closest('.note')) return;
+  addNote(e.clientX - 95, e.clientY - 40);
+});
+
+/* keyboard shortcut */
+addEventListener('keydown', e => {
+  const typing = e.target.closest('input, textarea, [contenteditable="true"]');
+  if (typing) return;
+  if (e.key === 'n' || e.key === 'N') { e.preventDefault(); addNote(); }
+});
+
+/* mute toggle */
+const muteBtn = $('#mute');
+function paintMute(){ muteBtn.textContent = soundOn ? '🔊' : '🔇'; }
+muteBtn.onclick = () => {
+  soundOn = !soundOn;
+  localStorage.setItem('nebula.mute', soundOn ? '0' : '1');
+  paintMute();
+  if (soundOn) blip(880, 0.07);
+};
+paintMute();
+
+/* ══════════════════════════ broadcasts ══════════════════════════ */
 function queueMove(id, x, y) {
   moveBuf = { id, x, y };
   if (moveTimer) return;
@@ -508,6 +812,7 @@ addEventListener('pointermove', e => {
   }, 55);
 }, { passive:true });
 
+/* ══════════════════════════ cursors ══════════════════════════ */
 const cursorEls = new Map();
 function drawCursor(p) {
   if (p.id === me.id) return;
@@ -529,31 +834,24 @@ function drawCursor(p) {
   const tag = el.querySelector('.tag');
   tag.textContent = p.name;
   tag.style.background = p.color;
+
   clearTimeout(el._kill);
   el._kill = setTimeout(() => { el.remove(); cursorEls.delete(p.id); }, 7000);
 }
 
-function spawnEmoji(x, y, emoji) {
-  const el = document.createElement('div');
-  el.className = 'emoji';
-  el.textContent = emoji;
-  el.style.left = x + 'px';
-  el.style.top  = y + 'px';
-  document.body.appendChild(el);
-  setTimeout(() => el.remove(), 1600);
-}
-
+/* ══════════════════════════ presence ══════════════════════════ */
+let lastUsers = 0;
 function renderPeople() {
   if (!room) return;
   const state = room.presenceState();
   const users = Object.values(state).flat();
   const box = $('#people');
   box.innerHTML = '';
+
   users.slice(0, 6).forEach(u => {
     const d = document.createElement('div');
     d.className = 'avatar';
     d.style.background = u.color || '#888';
-    d.style.color = '#07070d';
     d.textContent = (u.name || '?')[0].toUpperCase();
     d.title = u.name || '';
     box.appendChild(d);
@@ -564,24 +862,33 @@ function renderPeople() {
     d.textContent = '+' + (users.length - 6);
     box.appendChild(d);
   }
+
   const txt = $('#statusText');
   if ($('#status').classList.contains('live')) txt.textContent = users.length + ' here';
+
+  if (users.length > lastUsers && lastUsers > 0) {
+    const newest = users.find(u => u.id !== me.id);
+    if (newest) tick(`<b style="color:${newest.color}">${newest.name}</b> joined`);
+  }
+  lastUsers = users.length;
 }
 
+/* ══════════════════════════ boot ══════════════════════════ */
 async function boot() {
-  if (!CFG.url || !CFG.key) return showSetup();
+  const url = SUPABASE_URL.replace(/\/+$/,'').replace(/\/rest\/v1$/,'');
+  sb = createClient(url, SUPABASE_KEY, { realtime: { params: { eventsPerSecond: 25 } } });
 
-  try {
-    sb = createClient(CFG.url, CFG.key, { realtime: { params: { eventsPerSecond: 25 } } });
-  } catch {
-    return showSetup('That Supabase URL looks invalid.');
-  }
-
+  /* initial load */
   const { data, error } = await sb.from('notes').select('*').order('created_at', { ascending:true });
-  if (error) return showSetup('Could not read "notes" — did you run the SQL? (' + error.message + ')');
+  if (error) {
+    toast('DB error: ' + error.message);
+    console.error(error);
+    return;
+  }
   data.forEach(upsertNote);
   updateEmpty();
 
+  /* realtime: rows */
   sb.channel('nebula-db')
     .on('postgres_changes', { event:'*', schema:'public', table:'notes' }, payload => {
       if (payload.eventType === 'DELETE') dropNote(payload.old.id);
@@ -589,6 +896,7 @@ async function boot() {
     })
     .subscribe();
 
+  /* realtime: presence + broadcast */
   room = sb.channel('nebula-room', { config: { presence: { key: me.id } } });
   room
     .on('presence', { event:'sync' }, renderPeople)
@@ -599,12 +907,16 @@ async function boot() {
       entry.data.x = payload.x; entry.data.y = payload.y;
       setPos(entry.el, payload.x, payload.y);
     })
-    .on('broadcast', { event:'react' }, ({ payload }) => spawnEmoji(payload.x, payload.y, payload.emoji))
+    .on('broadcast', { event:'react' }, ({ payload }) => {
+      spawnEmoji(payload.x, payload.y, payload.emoji);
+      blip(760, 0.05, 'triangle', 0.03);
+    })
     .subscribe(async status => {
       setStatus(status);
       if (status === 'SUBSCRIBED') {
-        await room.track({ name: me.name, color: me.color, at: Date.now() });
+        await room.track({ id: me.id, name: me.name, color: me.color, at: Date.now() });
         renderPeople();
+        tick(`you are <b style="color:${me.color}">${me.name}</b>`);
       }
     });
 
